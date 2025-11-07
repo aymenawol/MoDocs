@@ -2,12 +2,7 @@
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
-
-## Deployment
-
-Your project is live at:
+Project is live at:
 
 **[https://vercel.com/aymenawol070106-6751s-projects/v0-mo-docs](https://vercel.com/aymenawol070106-6751s-projects/v0-mo-docs)**
 
