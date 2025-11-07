@@ -1,0 +1,178 @@
+[
+  {
+    "id": "doc-001",
+    "documentType": "Invoice",
+    "createdAt": "2025-11-01T10:30:00Z",
+    "updatedAt": "2025-11-01T10:30:00Z",
+    "author": "Sarah Johnson",
+    "invoiceNumber": "INV-2025-001",
+    "invoiceDate": "2025-11-01",
+    "dueDate": "2025-12-01",
+    "companyInfo": {
+      "name": "Acme Corporation",
+      "address": "123 Business St, Suite 100, New York, NY 10001",
+      "phone": "(555) 123-4567",
+      "email": "billing@acme.com"
+    },
+    "clientInfo": {
+      "name": "Client Company Inc",
+      "address": "456 Client Ave, Los Angeles, CA 90001",
+      "phone": "(555) 987-6543",
+      "email": "accounts@client.com"
+    },
+    "items": [
+      {
+        "description": "Professional Services - Q4 2024",
+        "quantity": 1,
+        "unitPrice": 5000,
+        "total": 5000
+      },
+      {
+        "description": "Consulting Hours (40 hrs @ $150/hr)",
+        "quantity": 40,
+        "unitPrice": 150,
+        "total": 6000
+      }
+    ],
+    "subtotal": 11000,
+    "taxRate": 0.08,
+    "taxAmount": 880,
+    "totalAmount": 11880,
+    "paymentTerms": "Net 30 days",
+    "notes": "Thank you for your business"
+  },
+  {
+    "id": "doc-002",
+    "documentType": "Contract",
+    "createdAt": "2025-10-28T14:20:00Z",
+    "updatedAt": "2025-10-28T14:20:00Z",
+    "author": "Michael Chen",
+    "contractTitle": "Professional Services Agreement",
+    "parties": [
+      {
+        "name": "ABC Company LLC",
+        "role": "Client",
+        "address": "100 Main St, Boston, MA 02101"
+      },
+      {
+        "name": "XYZ Consulting Inc",
+        "role": "Consultant",
+        "address": "200 Park Ave, New York, NY 10001"
+      }
+    ],
+    "recitals": "WHEREAS, Client desires to engage Consultant to provide professional consulting services",
+    "terms": [
+      {
+        "heading": "Scope of Services",
+        "content": "Consultant shall provide strategic business consulting services"
+      },
+      {
+        "heading": "Compensation",
+        "content": "Client shall pay Consultant a fee of $150 per hour"
+      }
+    ],
+    "paymentTerms": "Net 30 days",
+    "duration": "12 months",
+    "terminationClause": "Either party may terminate with 30 days notice",
+    "confidentiality": "Both parties agree to maintain confidentiality",
+    "governingLaw": "State of New York"
+  },
+  {
+    "id": "doc-003",
+    "documentType": "Proposal",
+    "createdAt": "2025-11-03T09:15:00Z",
+    "updatedAt": "2025-11-03T09:15:00Z",
+    "author": "Emily Rodriguez",
+    "proposalTitle": "Digital Marketing Campaign Proposal",
+    "coverLetter": "Thank you for the opportunity to submit this proposal",
+    "introduction": "Comprehensive digital marketing strategy",
+    "background": "Strong reputation for eco-friendly products",
+    "objectives": [
+      "Increase website traffic by 60%",
+      "Grow social media followers by 100,000",
+      "Achieve 40% increase in online sales"
+    ],
+    "proposedSolution": "Integrated digital marketing approach",
+    "timeline": [
+      {
+        "milestone": "Campaign Strategy Finalization",
+        "date": "2025-12-01"
+      },
+      {
+        "milestone": "Campaign Launch",
+        "date": "2025-12-15"
+      }
+    ],
+    "budget": [
+      {
+        "item": "SEO Optimization",
+        "cost": 15000
+      },
+      {
+        "item": "Social Media Advertising",
+        "cost": 25000
+      }
+    ],
+    "totalCost": 85000,
+    "termsAndConditions": "Payment terms: 30% deposit upon signing",
+    "conclusion": "We look forward to partnering with you"
+  },
+  {
+    "id": "doc-004",
+    "documentType": "Work Order",
+    "createdAt": "2025-11-05T16:45:00Z",
+    "updatedAt": "2025-11-05T16:45:00Z",
+    "author": "Robert Anderson",
+    "workOrderNumber": "WO-2025-0156",
+    "workOrderDate": "2025-11-05",
+    "clientInfo": {
+      "name": "Metro City Hospital",
+      "address": "789 Healthcare Ave, Chicago, IL 60611",
+      "phone": "(312) 555-0199"
+    },
+    "workDescription": "HVAC system maintenance and inspection",
+    "assignedPersonnel": [
+      "Tom Richards - Lead HVAC Technician",
+      "Maria Santos - HVAC Specialist"
+    ],
+    "materialsRequired": [
+      "20 HEPA filters",
+      "Duct cleaning equipment"
+    ],
+    "estimatedCompletionDate": "2025-11-08",
+    "priority": "High",
+    "approvalSignature": "Robert Anderson"
+  },
+  {
+    "id": "doc-005",
+    "documentType": "Receipt",
+    "createdAt": "2025-11-06T11:22:00Z",
+    "updatedAt": "2025-11-06T11:22:00Z",
+    "author": "Store Manager",
+    "receiptNumber": "REC-2025-00892",
+    "receiptDate": "2025-11-06",
+    "companyInfo": {
+      "name": "TechGear Electronics Store",
+      "address": "456 Commerce Plaza, Seattle, WA 98101",
+      "phone": "(206) 555-0177"
+    },
+    "customerInfo": {
+      "name": "Alex Thompson",
+      "email": "alex.thompson@email.com"
+    },
+    "items": [
+      {
+        "description": "Laptop - Model Pro X15",
+        "amount": 1299.99
+      },
+      {
+        "description": "Wireless Mouse",
+        "amount": 49.99
+      }
+    ],
+    "subtotal": 1579.96,
+    "taxAmount": 142.2,
+    "totalAmount": 1722.16,
+    "paymentMethod": "Credit Card - Visa"
+  }
+]
