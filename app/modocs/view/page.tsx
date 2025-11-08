@@ -114,13 +114,13 @@ export default function ViewPage() {
                 <h1 className="text-xl font-bold text-foreground">MoDocs</h1>
               </div>
             </Link>
-            <Link href="/modocs/create">
-              <Button className="gap-2">
+            <Button className="gap-2" asChild>
+              <Link href="/modocs/create">
                 <PlusCircle className="h-4 w-4" />
                 <span className="hidden sm:inline">Create Document</span>
                 <span className="sm:hidden">Create</span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </nav>
@@ -201,7 +201,7 @@ export default function ViewPage() {
                       <CardDescription className="text-muted-foreground mt-1">{doc.documentType}</CardDescription>
                     </div>
                     <div
-                      className="h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0"
+                      className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
                       style={{ backgroundColor: "rgba(38, 99, 235, 0.1)" }}
                     >
                       <FileText className="h-5 w-5" style={{ color: "#2663eb" }} />
@@ -350,12 +350,12 @@ export default function ViewPage() {
                   ? "Create your first document to get started"
                   : "Try adjusting your search or filter criteria"}
               </p>
-              <Link href="/modocs/create">
-                <Button className="gap-2">
+              <Button className="gap-2" asChild>
+                <Link href="/modocs/create">
                   <PlusCircle className="h-4 w-4" />
                   Create Your First Document
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         )}

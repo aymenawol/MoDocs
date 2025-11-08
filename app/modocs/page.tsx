@@ -56,15 +56,15 @@ export default function LandingPage() {
             </Link>
 
             <div className="hidden md:flex items-center gap-4">
-              <Link href="/modocs/view">
-                <Button variant="outline">Manage Documents</Button>
-              </Link>
-              <Link href="/modocs/create">
-                <Button className="gap-2">
+              <Button variant="outline" asChild>
+                <Link href="/modocs/view">Manage Documents</Link>
+              </Button>
+              <Button className="gap-2" asChild>
+                <Link href="/modocs/create">
                   <PlusCircle className="h-4 w-4" />
                   Create Document
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
 
             <button
@@ -79,17 +79,17 @@ export default function LandingPage() {
           {mobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-border">
               <div className="flex flex-col gap-3">
-                <Link href="/modocs/view" className="w-full">
-                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+                  <Link href="/modocs/view">
                     Manage Documents
-                  </Button>
-                </Link>
-                <Link href="/modocs/create" className="w-full">
-                  <Button className="w-full justify-start gap-2">
+                  </Link>
+                </Button>
+                <Button className="w-full justify-start gap-2" asChild>
+                  <Link href="/modocs/create">
                     <PlusCircle className="h-4 w-4" />
                     Create Document
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </div>
           )}
