@@ -27,6 +27,7 @@ export default function CreatePage() {
   const { toast } = useToast()
   const router = useRouter()
   const [documentType, setDocumentType] = useState<DocumentType | "Other" | "">("")
+  const [customDocumentType, setCustomDocumentType] = useState("")
   const [documentTitle, setDocumentTitle] = useState("")
   const [formData, setFormData] = useState<any>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -121,7 +122,6 @@ export default function CreatePage() {
   }
 
   const handleSaveAndLeave = () => {
-    // Save as in-progress
     const inProgressDoc = {
       ...formData,
       title: documentTitle || "Untitled Document",
@@ -165,6 +165,7 @@ export default function CreatePage() {
   const handleDocumentTypeChange = (type: DocumentType | "Other") => {
     setDocumentType(type)
     setDocumentTitle("")
+    setCustomDocumentType("")
     setErrors({})
     setFormData({
       documentType: type,
@@ -221,6 +222,15 @@ export default function CreatePage() {
       newErrors.documentTitle = "Document title must be at least 3 characters"
     } else if (documentTitle.length > 100) {
       newErrors.documentTitle = "Document title must be less than 100 characters"
+    }
+
+    if (documentType === "Other") {
+      if (!customDocumentType || customDocumentType.trim() === "") {
+        newErrors.customDocumentType = "Document type is required"
+      }
+      if (!formData.content || formData.content.trim() === "" || formData.content.trim().length < 10) {
+        newErrors.content = "Content must be at least 10 characters"
+      }
     }
 
     // Type-specific validation
@@ -296,8 +306,11 @@ export default function CreatePage() {
       return
     }
 
+    const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
+
     const documentData = {
       ...formData,
+      documentType: finalDocumentType,
       title: documentTitle,
       status: "completed",
       updatedAt: new Date().toISOString(),
@@ -447,13 +460,13 @@ export default function CreatePage() {
               Your document has been successfully saved and downloaded as output.json
             </p>
             <div className="flex flex-col gap-3">
-              <Link href="/moyourname/view" className="w-full">
+              <Link href="/modocs/view" className="w-full">
                 <Button className="w-full gap-2">
                   <Eye className="h-4 w-4" />
                   See in Document Manager
                 </Button>
               </Link>
-              <Link href="/moyourname/create" className="w-full">
+              <Link href="/modocs/create" className="w-full">
                 <Button
                   variant="outline"
                   className="w-full bg-transparent"
@@ -461,6 +474,7 @@ export default function CreatePage() {
                     setShowSuccessMessage(false)
                     setDocumentType("")
                     setDocumentTitle("")
+                    setCustomDocumentType("")
                     setFormData({})
                     setErrors({})
                     setEditingDocId(null)
@@ -488,7 +502,7 @@ export default function CreatePage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleDiscardAndLeave}>Don't Save</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSaveAndLeave}>Save as In Progress</AlertDialogAction>
+            <AlertDialogAction onClick={handleSaveAndLeave}>Save</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -498,7 +512,7 @@ export default function CreatePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <button
-              onClick={() => handleNavigation("/moyourname")}
+              onClick={() => handleNavigation("/modocs")}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <ArrowLeft className="h-5 w-5 text-muted-foreground" />
@@ -508,10 +522,10 @@ export default function CreatePage() {
               </div>
             </button>
             <div className="flex items-center gap-4">
-              <button onClick={() => handleNavigation("/moyourname/view")}>
+              <button onClick={() => handleNavigation("/modocs/view")}>
                 <Button variant="outline" className="gap-2 bg-transparent">
                   <Eye className="h-4 w-4" />
-                  <span className="hidden sm:inline">View Documents</span>
+                  <span className="hidden sm:inline">Manage Documents</span>
                 </Button>
               </button>
               <Button onClick={handleSave} className="gap-2" disabled={!documentType}>
@@ -539,27 +553,56 @@ export default function CreatePage() {
               Choose the type of document you want to create
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Select value={documentType} onValueChange={handleDocumentTypeChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select document type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Invoice">Invoice</SelectItem>
-                <SelectItem value="Purchase Order">Purchase Order</SelectItem>
-                <SelectItem value="Contract">Contract / Agreement</SelectItem>
-                <SelectItem value="Business Letter">Business Letter</SelectItem>
-                <SelectItem value="Memo">Memo</SelectItem>
-                <SelectItem value="Report">Report</SelectItem>
-                <SelectItem value="Financial Statement">Financial Statement</SelectItem>
-                <SelectItem value="Work Order">Work Order</SelectItem>
-                <SelectItem value="Proposal">Proposal</SelectItem>
-                <SelectItem value="Receipt">Receipt</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Type *</Label>
+              <Select value={documentType} onValueChange={handleDocumentTypeChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select document type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Invoice">Invoice</SelectItem>
+                  <SelectItem value="Purchase Order">Purchase Order</SelectItem>
+                  <SelectItem value="Contract">Contract / Agreement</SelectItem>
+                  <SelectItem value="Business Letter">Business Letter</SelectItem>
+                  <SelectItem value="Memo">Memo</SelectItem>
+                  <SelectItem value="Report">Report</SelectItem>
+                  <SelectItem value="Financial Statement">Financial Statement</SelectItem>
+                  <SelectItem value="Work Order">Work Order</SelectItem>
+                  <SelectItem value="Proposal">Proposal</SelectItem>
+                  <SelectItem value="Receipt">Receipt</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {documentType === "Other" && (
+              <div>
+                <Label htmlFor="customDocumentType">Custom Document Type *</Label>
+                <Input
+                  id="customDocumentType"
+                  value={customDocumentType}
+                  onChange={(e) => {
+                    setCustomDocumentType(e.target.value)
+                    if (errors.customDocumentType) {
+                      setErrors((prev) => {
+                        const newErrors = { ...prev }
+                        delete newErrors.customDocumentType
+                        return newErrors
+                      })
+                    }
+                  }}
+                  placeholder="e.g., Policy Document, Meeting Minutes"
+                  className={errors.customDocumentType ? "border-destructive" : ""}
+                />
+                {errors.customDocumentType && (
+                  <p className="text-sm text-destructive mt-1">{errors.customDocumentType}</p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Removed duplicate Card for custom document type from updates */}
 
         {documentType && (
           <Card className="border-border bg-card mb-6">
@@ -571,7 +614,7 @@ export default function CreatePage() {
             </CardHeader>
             <CardContent>
               <div>
-                <Label htmlFor="documentTitle">Title</Label>
+                <Label htmlFor="documentTitle">Title *</Label>
                 <Input
                   id="documentTitle"
                   value={documentTitle}
@@ -599,7 +642,7 @@ export default function CreatePage() {
 
         {documentType && (
           <div className="mt-8 flex justify-end gap-4">
-            <Link href="/moyourname">
+            <Link href="/modocs">
               <Button variant="outline">Cancel</Button>
             </Link>
             <Button onClick={handleSave} className="gap-2">

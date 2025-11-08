@@ -133,8 +133,9 @@
   h6 {
     font-family: var(--font-heading);
   }
-  /* Add cursor pointer to all buttons */
+  /* Add pill-shaped buttons throughout the site */
   button {
     cursor: pointer;
+    border-radius: 9999px !important;
   }
 }

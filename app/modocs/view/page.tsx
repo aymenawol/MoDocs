@@ -45,15 +45,15 @@ export default function ViewPage() {
     return () => window.removeEventListener("storage", loadDocuments)
   }, [])
 
-  // Filter documents based on search and type filter - only show completed
-  const filteredDocuments = documents.filter((doc) => {
-    const matchesSearch =
-      (doc.title || doc.documentType).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.author.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesType = filterType === "all" || doc.documentType === filterType
-    const isCompleted = doc.status === "completed" || !doc.status
-    return matchesSearch && matchesType && isCompleted
-  })
+  const filteredDocuments = documents
+    .filter((doc) => {
+      const matchesSearch =
+        (doc.title || doc.documentType).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.author.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesType = filterType === "all" || doc.documentType === filterType
+      return matchesSearch && matchesType
+    })
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
 
   const handleDelete = (id: string) => {
     setDocumentToDelete(id)
@@ -79,7 +79,7 @@ export default function ViewPage() {
   const handleEdit = (doc: any) => {
     // Store document to edit in sessionStorage
     sessionStorage.setItem("modocs_edit_document", JSON.stringify(doc))
-    router.push("/moyourname/create")
+    router.push("/modocs/create")
   }
 
   // Helper to get display title
@@ -108,18 +108,16 @@ export default function ViewPage() {
       <nav className="border-b border-border bg-card sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/moyourname" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link href="/modocs" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <ArrowLeft className="h-5 w-5 text-muted-foreground" />
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-foreground">MoDocs</h1>
               </div>
             </Link>
-            <Link href="/moyourname/create">
+            <Link href="/modocs/create">
               <Button className="gap-2">
                 <PlusCircle className="h-4 w-4" />
-                {/* Create Document */}
                 <span className="hidden sm:inline">Create Document</span>
-                {/* Create */}
                 <span className="sm:hidden">Create</span>
               </Button>
             </Link>
@@ -185,8 +183,7 @@ export default function ViewPage() {
         {/* Results Count */}
         <div className="mb-4">
           <p className="text-sm text-muted-foreground">
-            Showing {filteredDocuments.length} of{" "}
-            {documents.filter((d) => d.status === "completed" || !d.status).length} completed documents
+            Showing {filteredDocuments.length} of {documents.length} documents
           </p>
         </div>
 
@@ -221,6 +218,18 @@ export default function ViewPage() {
                       <span className="text-muted-foreground">Created:</span>
                       <span className="font-medium text-foreground">
                         {new Date(doc.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Status:</span>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          doc.status === "in-progress"
+                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                            : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        }`}
+                      >
+                        {doc.status === "in-progress" ? "In Progress" : "Completed"}
                       </span>
                     </div>
                     {(doc.totalAmount || doc.totalCost) && (
@@ -269,6 +278,7 @@ export default function ViewPage() {
                     <TableHead>Title</TableHead>
                     <TableHead>Author</TableHead>
                     <TableHead>Created</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -287,6 +297,17 @@ export default function ViewPage() {
                       <TableCell className="font-medium">{doc.title || doc.documentType}</TableCell>
                       <TableCell>{doc.author}</TableCell>
                       <TableCell>{new Date(doc.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            doc.status === "in-progress"
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                              : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                          }`}
+                        >
+                          {doc.status === "in-progress" ? "In Progress" : "Completed"}
+                        </span>
+                      </TableCell>
                       <TableCell
                         className={doc.totalAmount || doc.totalCost ? "font-semibold" : ""}
                         style={doc.totalAmount || doc.totalCost ? { color: "#2663eb" } : {}}
@@ -325,11 +346,11 @@ export default function ViewPage() {
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No documents found</h3>
               <p className="text-muted-foreground mb-6">
-                {documents.filter((d) => d.status === "completed" || !d.status).length === 0
+                {documents.length === 0
                   ? "Create your first document to get started"
                   : "Try adjusting your search or filter criteria"}
               </p>
-              <Link href="/moyourname/create">
+              <Link href="/modocs/create">
                 <Button className="gap-2">
                   <PlusCircle className="h-4 w-4" />
                   Create Your First Document
