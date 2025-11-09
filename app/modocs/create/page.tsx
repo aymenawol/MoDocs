@@ -35,7 +35,6 @@ import { useToast } from "@/hooks/use-toast"
 import type { DocumentType } from "@/lib/document-types"
 import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
-import ReactDOMServer from "react-dom/server"
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
   const steps = [
@@ -369,20 +368,22 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
         </div>
       )
     } else if (documentType === "Business Letter") {
-      const recipient = formData.recipient || "[Recipient Name]"
+      const recipient = formData.recipientName || "[Recipient Name]"
       const subject = formData.subject || "[Subject Line]"
       const body = formData.body || ""
       const date = formData.date || new Date().toLocaleDateString()
+      const senderName = formData.senderName || "Your Name"
+      const senderTitle = formData.senderTitle || "Your Title"
 
       return (
         <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
           {/* Letterhead */}
           <div className="text-right mb-8">
-            <p className="font-bold text-lg">Your Company Name</p>
-            <p className="text-sm">123 Business Street</p>
-            <p className="text-sm">City, State 12345</p>
-            <p className="text-sm">Phone: (555) 123-4567</p>
-            <p className="text-sm">Email: info@yourcompany.com</p>
+            <p className="font-bold text-lg">{formData.senderName || "Your Company Name"}</p>
+            <p className="text-sm">{formData.senderAddress?.split("\n")[1] || "123 Business Street"}</p>
+            <p className="text-sm">{formData.senderAddress?.split("\n")[2] || "City, State 12345"}</p>
+            <p className="text-sm">{formData.senderAddress?.split("\n")[3] || "Phone: (555) 123-4567"}</p>
+            <p className="text-sm">{formData.senderAddress?.split("\n")[4] || "Email: info@yourcompany.com"}</p>
           </div>
 
           {/* Date */}
@@ -393,10 +394,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           {/* Recipient */}
           <div className="mb-8">
             <p className="font-semibold">{recipient}</p>
-            <p className="text-sm">Senior Manager</p>
-            <p className="text-sm">Target Company Inc.</p>
-            <p className="text-sm">456 Corporate Avenue</p>
-            <p className="text-sm">City, State 12345</p>
+            <p className="text-sm">{formData.recipientTitle || "Senior Manager"}</p>
+            <p className="text-sm">{formData.recipientCompany || "Target Company Inc."}</p>
+            <p className="text-sm">{formData.recipientAddress?.split("\n")[1] || "456 Corporate Avenue"}</p>
+            <p className="text-sm">{formData.recipientAddress?.split("\n")[2] || "City, State 12345"}</p>
           </div>
 
           {/* Subject */}
@@ -406,7 +407,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Salutation */}
           <div className="mb-4">
-            <p>Dear {recipient.split(" ")[0] || "Sir/Madam"},</p>
+            <p>{formData.salutation || `Dear ${recipient.split(" ")[0] || "Sir/Madam"},`}</p>
           </div>
 
           {/* Body */}
@@ -432,19 +433,19 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           {/* Closing */}
           <div className="mt-8">
             <p className="mb-12">
-              {tone === "formal"
-                ? "Respectfully yours,"
-                : tone === "friendly"
-                  ? "Warmly,"
-                  : tone === "casual"
-                    ? "Best regards,"
-                    : "Sincerely,"}
+              {formData.closing ||
+                (tone === "formal"
+                  ? "Respectfully yours,"
+                  : tone === "friendly"
+                    ? "Warmly,"
+                    : tone === "casual"
+                      ? "Best regards,"
+                      : "Sincerely,")}
             </p>
             <div>
               <div className="border-b border-black w-48 mb-1"></div>
-              <p className="font-semibold">Your Name</p>
-              <p className="text-sm">Chief Executive Officer</p>
-              <p className="text-sm">Your Company Name</p>
+              <p className="font-semibold">{senderName}</p>
+              <p className="text-sm">{senderTitle}</p>
             </div>
           </div>
         </div>
@@ -453,7 +454,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
       const to = formData.to || "[Recipients]"
       const from = formData.from || "[Your Name]"
       const subject = formData.subject || "[Subject]"
-      const body = formData.body || ""
+      const body = formData.mainContent || "" // Using mainContent for the body
       const date = formData.date || new Date().toLocaleDateString()
 
       return (
@@ -530,9 +531,9 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
     } else if (documentType === "Proposal") {
       const client = formData.client || "[Client Name]"
       const executiveSummary = formData.executiveSummary || ""
-      const scope = formData.scope || ""
+      const scope = formData.proposedSolution || ""
       const timeline = formData.timeline || ""
-      const budget = formData.budget || "[Amount]"
+      const budget = formData.totalCost || "[Amount]"
 
       return (
         <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
@@ -656,9 +657,9 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
       )
     } else if (documentType === "Receipt") {
       const receiptNumber = formData.receiptNumber || "RCP-001"
-      const date = formData.date || new Date().toLocaleDateString()
+      const date = formData.receiptDate || new Date().toLocaleDateString()
       const paymentMethod = formData.paymentMethod || "Cash"
-      const amount = formData.amount || "0.00"
+      const amount = formData.totalAmount || "0.00" // Use totalAmount for receipt value
 
       return (
         <div className="space-y-6 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
@@ -670,11 +671,11 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Business Info */}
           <div className="text-center mb-6">
-            <p className="font-bold text-lg">Your Business Name</p>
-            <p className="text-sm">123 Main Street</p>
-            <p className="text-sm">City, State 12345</p>
-            <p className="text-sm">Phone: (555) 123-4567</p>
-            <p className="text-sm">Email: info@yourbusiness.com</p>
+            <p className="font-bold text-lg">{formData.companyInfo?.name || "Your Business Name"}</p>
+            <p className="text-sm">{formData.companyInfo?.address?.split("\n")[0] || "123 Main Street"}</p>
+            <p className="text-sm">{formData.companyInfo?.address?.split("\n")[1] || "City, State 12345"}</p>
+            <p className="text-sm">{formData.companyInfo?.phone || "Phone: (555) 123-4567"}</p>
+            <p className="text-sm">{formData.companyInfo?.email || "Email: info@yourbusiness.com"}</p>
           </div>
 
           {/* Transaction Details */}
@@ -704,8 +705,8 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             </thead>
             <tbody>
               <tr className="border-b border-gray-300">
-                <td className="py-2">Professional Services</td>
-                <td className="text-center py-2">1</td>
+                <td className="py-2">{formData.itemDescription || "Professional Services"}</td>
+                <td className="text-center py-2">{formData.quantity || 1}</td>
                 <td className="text-right py-2">${amount}</td>
               </tr>
             </tbody>
@@ -759,6 +760,71 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                     "title",
                     "tone",
                     "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
                   ].includes(key),
               )
               .map(([key, value]) => (
@@ -1030,44 +1096,85 @@ export default function CreateDocumentPage() {
     }
   }
 
-  const handleGenerate = () => {
-    if (!documentTitle.trim()) {
-      setErrors({ documentTitle: "Document title is required" })
+  const handleGenerate = async () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!documentTitle?.trim()) {
+      newErrors.documentTitle = "Document title is required"
       toast({
-        title: "Title Required",
+        title: "Validation Error",
         description: "Please enter a document title",
         variant: "destructive",
       })
-      return
     }
-    if (documentTitle.trim().length < 3) {
-      setErrors({ documentTitle: "Document title must be at least 3 characters" })
-      toast({
-        title: "Title Too Short",
-        description: "Document title must be at least 3 characters",
-        variant: "destructive",
-      })
-      return
+
+    // Type-specific validation
+    if (documentType === "Invoice") {
+      if (!formData.invoiceNumber?.trim()) newErrors.invoiceNumber = "Invoice number is required"
+      if (!formData.clientInfo?.name?.trim()) newErrors.clientInfo = { name: "Client name is required" } as any // Corrected for nested field
+      if (!formData.totalAmount || Number.parseFloat(formData.totalAmount) <= 0)
+        newErrors.totalAmount = "Total amount must be greater than 0"
+    } else if (documentType === "Contract") {
+      if (!formData.partyA?.trim()) newErrors.partyA = "First party name is required"
+      if (!formData.partyB?.trim()) newErrors.partyB = "Second party name is required"
+      if (!formData.duration?.trim()) newErrors.duration = "Duration is required"
+    } else if (documentType === "Business Letter") {
+      if (!formData.recipientName?.trim()) newErrors.recipientName = "Recipient name is required"
+      if (!formData.body?.trim() || formData.body.length < 10)
+        newErrors.body = "Letter body must be at least 10 characters"
+    } else if (documentType === "Memo") {
+      if (!formData.to?.trim()) newErrors.to = "'To' field is required"
+      if (!formData.subject?.trim()) newErrors.subject = "Subject is required"
+      if (!formData.mainContent?.trim() || formData.mainContent.length < 10)
+        newErrors.mainContent = "Content must be at least 10 characters"
+    } else if (documentType === "Receipt") {
+      if (!formData.receiptNumber?.trim()) newErrors.receiptNumber = "Receipt number is required"
+      if (!formData.companyInfo?.name?.trim()) newErrors.companyInfo = { name: "Company name is required" } as any
+      if (!formData.totalAmount || Number.parseFloat(formData.totalAmount) <= 0)
+        newErrors.totalAmount = "Total amount must be greater than 0"
+    } else if (documentType === "Other") {
+      if (!formData.content?.trim() || formData.content.length < 10)
+        newErrors.content = "Content must be at least 10 characters"
     }
-    if (!validateForm()) {
-      toast({
-        title: "Validation Error",
-        description: "Please fix the errors in the form before generating",
-        variant: "destructive",
-      })
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
       return
     }
 
+    setErrors({})
     setIsGenerating(true)
 
-    setTimeout(() => {
-      setIsGenerating(false)
-      setCurrentStep(4)
-      toast({
-        title: "Document Generated!",
-        description: "Your document has been generated successfully.",
-      })
-    }, 3000)
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+
+    setIsGenerating(false)
+    setCurrentStep(4)
+    setShowPreview(true)
+    setHasUnsavedChanges(true)
+
+    const savedDoc = {
+      id: formData.id || Date.now().toString(),
+      documentType: documentType === "Other" ? customDocumentType : documentType,
+      title: documentTitle,
+      status: "Completed",
+      createdAt: new Date().toISOString(),
+      tone,
+      formData,
+    }
+
+    const docs = JSON.parse(localStorage.getItem("modocs_documents") || "[]")
+    const existingIndex = docs.findIndex((d: any) => d.id === savedDoc.id)
+    if (existingIndex >= 0) {
+      docs[existingIndex] = savedDoc
+    } else {
+      docs.push(savedDoc)
+    }
+    localStorage.setItem("modocs_documents", JSON.stringify(docs))
+
+    toast({
+      title: "Document Generated!",
+      description: "Your document is ready for download",
+    })
   }
 
   const handleInputChange = (field: string, value: any) => {
@@ -1110,7 +1217,7 @@ export default function CreateDocumentPage() {
   }
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string | Record<string, any>> = {} // Allow nested errors
 
     // Title validation is already handled in handleNext, but good to have here too
     if (!documentTitle || documentTitle.trim() === "") {
@@ -1126,20 +1233,31 @@ export default function CreateDocumentPage() {
     // Type-specific validation
     if (documentType === "Invoice") {
       if (!formData.invoiceNumber?.trim()) newErrors.invoiceNumber = "Invoice number is required"
+      if (!formData.clientInfo?.name?.trim()) newErrors.clientInfo = { name: "Client name is required" } as any
       if (!formData.totalAmount || formData.totalAmount <= 0)
         newErrors.totalAmount = "Total amount must be greater than 0"
     } else if (documentType === "Contract") {
       if (!formData.contractTitle?.trim()) newErrors.contractTitle = "Contract title is required"
+      if (!formData.partyA?.trim()) newErrors.partyA = "First party name is required"
+      if (!formData.partyB?.trim()) newErrors.partyB = "Second party name is required"
       if (!formData.duration?.trim()) newErrors.duration = "Duration is required"
     } else if (documentType === "Business Letter") {
-      if (!formData.recipientAddress?.trim()) newErrors.recipientAddress = "Recipient address is required"
-      if (!formData.body?.trim()) newErrors.body = "Letter body is required"
+      if (!formData.recipientName?.trim()) newErrors.recipientName = "Recipient name is required"
+      if (!formData.body?.trim() || formData.body.length < 10)
+        newErrors.body = "Letter body must be at least 10 characters"
     } else if (documentType === "Memo") {
       if (!formData.to?.trim()) newErrors.to = "'To' field is required"
       if (!formData.subject?.trim()) newErrors.subject = "Subject is required"
-      if (!formData.mainContent?.trim()) newErrors.mainContent = "Main content is required"
+      if (!formData.mainContent?.trim() || formData.mainContent.length < 10)
+        newErrors.mainContent = "Content must be at least 10 characters"
+    } else if (documentType === "Receipt") {
+      if (!formData.receiptNumber?.trim()) newErrors.receiptNumber = "Receipt number is required"
+      if (!formData.companyInfo?.name?.trim()) newErrors.companyInfo = { name: "Company name is required" } as any
+      if (!formData.totalAmount || formData.totalAmount <= 0)
+        newErrors.totalAmount = "Total amount must be greater than 0"
     } else if (documentType === "Other") {
-      if (!formData.content?.trim()) newErrors.content = "Content is required"
+      if (!formData.content?.trim() || formData.content.length < 10)
+        newErrors.content = "Content must be at least 10 characters"
     }
 
     setErrors(newErrors)
@@ -1228,64 +1346,45 @@ export default function CreateDocumentPage() {
   }
 
   const handleDownloadPDF = async () => {
-    const previewElement = document.getElementById("document-preview-content")
-    if (!previewElement) {
-      toast({
-        title: "Error",
-        description: "No preview available to download",
-        variant: "destructive",
-      })
-      return
-    }
-
     try {
-      toast({
-        title: "Generating PDF...",
-        description: "Please wait while we prepare your document",
-      })
-
-      // Capture the preview element as canvas
-      const canvas = await html2canvas(previewElement, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-      })
-
-      // Calculate PDF dimensions
-      const imgWidth = 210 // A4 width in mm
-      const pageHeight = 297 // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-      let heightLeft = imgHeight
-
-      const pdf = new jsPDF("p", "mm", "a4")
-      let position = 0
-
-      // Add image to PDF
-      const imgData = canvas.toDataURL("image/png")
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-
-      // Add new pages if content overflows
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight
-        pdf.addPage()
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
+      const element = document.getElementById("document-preview-content")
+      if (!element) {
+        throw new Error("Preview element not found")
       }
 
-      // Download the PDF
+      // html2canvas needs a specific config to work with styled components and custom fonts.
+      // We are using standard Tailwind CSS here which should work, but if issues arise,
+      // consider setting `window.scrollTo(0, 0)` and ensuring the element is visible.
+      const canvas = await html2canvas(element, {
+        scale: 2, // Increase scale for better resolution
+        backgroundColor: "#ffffff", // Ensure a white background
+        logging: false, // Disable logging for cleaner console
+        useCORS: true, // Allow images from other origins if any
+        allowTaint: true, // Allow taint if CORS is not an issue
+      })
+
+      const imgData = canvas.toDataURL("image/png")
+      const pdf = new jsPDF("p", "mm", "a4")
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = pdf.internal.pageSize.getHeight()
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+      const imgX = (pdfWidth - imgWidth * ratio) / 2 // Center horizontally
+      const imgY = 0 // Start from top
+
+      pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio)
       pdf.save(`${documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`)
 
       toast({
         title: "PDF Downloaded",
         description: "Your document has been saved as PDF",
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error("PDF generation error:", error)
       toast({
-        title: "Error",
-        description: "Failed to generate PDF. Please try again.",
+        title: "Download Failed",
+        description: "Unable to generate PDF. Please try again.",
         variant: "destructive",
       })
     }
@@ -1466,31 +1565,8 @@ export default function CreateDocumentPage() {
     }
   }
 
-  const generateDocument = () => {
-    // This function should render the document preview.
-    // It's essentially a call to the DocumentPreview component's logic.
-    // For simplicity, we can use a placeholder or re-use the component's structure.
-
-    // To properly render in this context, we'll simulate the DocumentPreview output
-    // This might need adjustment if DocumentPreview has internal state or dependencies
-    // that are not directly available here.
-    const previewElement = document.createElement("div") // Create a temporary element to render into
-
-    // Re-render the DocumentPreview component's output into this element.
-    // This is a simplified approach; in a real app, you might use a rendering library
-    // or ensure DocumentPreview is a functional component that can be called.
-    const previewContent = ReactDOMServer.renderToString(
-      <DocumentPreview
-        formData={formData}
-        documentType={documentType === "Other" ? customDocumentType : documentType}
-        documentTitle={documentTitle}
-        tone={tone}
-      />,
-    )
-
-    previewElement.innerHTML = previewContent
-    return previewElement.innerHTML
-  }
+  // Removed generateDocument function as it's not used and causes errors.
+  // Downloads work directly with the DOM element via getElementById.
 
   if (showSuccessMessage) {
     return (
@@ -1726,8 +1802,12 @@ export default function CreateDocumentPage() {
                 </Card>
                 {renderFormFields()}
 
-                <div className="pt-4">
-                  <Button onClick={handleGenerate} className="w-full gap-2" size="lg" disabled={isGenerating}>
+                <div className="flex justify-between gap-4 pt-4">
+                  <Button variant="outline" onClick={handleBack} className="gap-2 bg-transparent">
+                    <ChevronLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button onClick={handleGenerate} className="gap-2 flex-1" size="lg" disabled={isGenerating}>
                     {isGenerating ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
@@ -1744,24 +1824,23 @@ export default function CreateDocumentPage() {
               </>
             )}
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between gap-4 pt-4">
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                disabled={currentStep === 1}
-                className="gap-2 bg-transparent"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back
-              </Button>
-              {currentStep < 4 && ( // Changed from 3 to 4
+            {currentStep < 3 && (
+              <div className="flex justify-between gap-4 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleBack}
+                  disabled={currentStep === 1}
+                  className="gap-2 bg-transparent"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Back
+                </Button>
                 <Button onClick={handleNext} className="gap-2">
                   Next
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-6">
@@ -1776,8 +1855,14 @@ export default function CreateDocumentPage() {
                 <div
                   id="document-preview-content"
                   className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 min-h-[600px]"
-                  dangerouslySetInnerHTML={{ __html: generateDocument() }}
-                />
+                >
+                  <DocumentPreview
+                    formData={formData}
+                    documentType={documentType === "Other" ? customDocumentType : documentType}
+                    documentTitle={documentTitle}
+                    tone={tone}
+                  />
+                </div>
 
                 <div className="mt-6 flex flex-col sm:flex-row gap-4">
                   <Button onClick={handleBack} variant="outline" className="gap-2 bg-transparent">
@@ -2039,6 +2124,26 @@ function ContractForm({ data, onChange, errors }: any) {
             {errors?.contractTitle && <p className="text-sm text-destructive mt-1">{errors.contractTitle}</p>}
           </div>
           <div>
+            <Label>Party A *</Label>
+            <Input
+              value={data.partyA || ""}
+              onChange={(e) => onChange("partyA", e.target.value)}
+              placeholder="ABC Corp"
+              className={errors?.partyA ? "border-destructive" : ""}
+            />
+            {errors?.partyA && <p className="text-sm text-destructive mt-1">{errors.partyA}</p>}
+          </div>
+          <div>
+            <Label>Party B *</Label>
+            <Input
+              value={data.partyB || ""}
+              onChange={(e) => onChange("partyB", e.target.value)}
+              placeholder="XYZ Ltd"
+              className={errors?.partyB ? "border-destructive" : ""}
+            />
+            {errors?.partyB && <p className="text-sm text-destructive mt-1">{errors.partyB}</p>}
+          </div>
+          <div>
             <Label>Recitals *</Label>
             <Textarea
               value={data.recitals || ""}
@@ -2109,15 +2214,39 @@ function BusinessLetterForm({ data, onChange, errors }: any) {
             />
           </div>
           <div>
-            <Label>Recipient Address *</Label>
+            <Label>Recipient Name *</Label>
+            <Input
+              value={data.recipientName || ""}
+              onChange={(e) => onChange("recipientName", e.target.value)}
+              placeholder="Jane Doe"
+              className={errors?.recipientName ? "border-destructive" : ""}
+            />
+            {errors?.recipientName && <p className="text-sm text-destructive mt-1">{errors.recipientName}</p>}
+          </div>
+          <div>
+            <Label>Recipient Title</Label>
+            <Input
+              value={data.recipientTitle || ""}
+              onChange={(e) => onChange("recipientTitle", e.target.value)}
+              placeholder="Senior Manager"
+            />
+          </div>
+          <div>
+            <Label>Recipient Company</Label>
+            <Input
+              value={data.recipientCompany || ""}
+              onChange={(e) => onChange("recipientCompany", e.target.value)}
+              placeholder="Target Company Inc."
+            />
+          </div>
+          <div>
+            <Label>Recipient Address</Label>
             <Textarea
               value={data.recipientAddress || ""}
               onChange={(e) => onChange("recipientAddress", e.target.value)}
               rows={3}
-              placeholder="Recipient Name&#10;456 Client Ave&#10;City, State 67890"
-              className={errors?.recipientAddress ? "border-destructive" : ""}
+              placeholder="456 Corporate Avenue&#10;City, State 12345"
             />
-            {errors?.recipientAddress && <p className="text-sm text-destructive mt-1">{errors.recipientAddress}</p>}
           </div>
           <div>
             <Label>Date</Label>
@@ -2259,6 +2388,14 @@ function MemoForm({ data, onChange, errors }: any) {
               onChange={(e) => onChange("closingRemarks", e.target.value)}
               rows={2}
               placeholder="Thank you for your attention to this matter."
+            />
+          </div>
+          <div>
+            <Label>CC</Label>
+            <Input
+              value={data.cc || ""}
+              onChange={(e) => onChange("cc", e.target.value)}
+              placeholder="Department Heads"
             />
           </div>
         </CardContent>
