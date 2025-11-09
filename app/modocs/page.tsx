@@ -126,7 +126,7 @@ export default function LandingPage() {
           >
             <div className="relative w-full aspect-square">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hero_image-reM0pwoj5NJOD1U4bemkPzVARfr6XX.png"
+                src="/images/design-mode/hero_image.png"
                 alt="Professional business document illustration"
                 fill
                 className="object-contain"
@@ -165,9 +165,10 @@ export default function LandingPage() {
             {recentActivity.length > 0 ? (
               <div className="space-y-4">
                 {recentActivity.map((activity, index) => (
-                  <div
+                  <Link
                     key={activity.id}
-                    className={`flex items-center justify-between p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-all duration-500 ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
+                    href={`/modocs/create?edit=${activity.id}`}
+                    className={`flex items-center justify-between p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-all duration-500 cursor-pointer block ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
                     style={{ transitionDelay: `${800 + index * 100}ms` }}
                   >
                     <div className="flex items-center gap-4">
@@ -193,7 +194,7 @@ export default function LandingPage() {
                         {activity.status === "in-progress" ? "In Progress" : "Completed"}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,32 +19,316 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { FileText, ArrowLeft, Download, Eye } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  FileText,
+  ArrowLeft,
+  Download,
+  Eye,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  ChevronDown,
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { DocumentType } from "@/lib/document-types"
 
-export default function CreatePage() {
+function StepIndicator({ currentStep }: { currentStep: number }) {
+  const steps = [
+    { number: 1, label: "Select Type" },
+    { number: 2, label: "Select Tone" },
+    { number: 3, label: "Fill in Details" },
+    { number: 4, label: "Generate" },
+  ]
+
+  return (
+    <div className="sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border py-4 mb-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="relative">
+          {/* Progress bar */}
+          <div className="absolute top-5 left-0 w-full h-0.5 bg-border">
+            <div
+              className="h-full bg-primary transition-all duration-500 ease-out"
+              style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+            />
+          </div>
+
+          {/* Steps */}
+          <div className="relative flex justify-between">
+            {steps.map((step) => {
+              const isCompleted = currentStep > step.number
+              const isCurrent = currentStep === step.number
+
+              return (
+                <div key={step.number} className="flex flex-col items-center">
+                  <div
+                    className={`
+                    w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm
+                    transition-all duration-300 ease-out
+                    ${
+                      isCompleted
+                        ? "bg-primary text-primary-foreground scale-100"
+                        : isCurrent
+                          ? "bg-primary text-primary-foreground scale-110 shadow-lg ring-4 ring-primary/20"
+                          : "bg-muted text-muted-foreground scale-90"
+                    }
+                  `}
+                  >
+                    {isCompleted ? <Check className="h-5 w-5" /> : step.number}
+                  </div>
+                  <span
+                    className={`
+                    mt-2 text-xs font-medium transition-colors duration-300
+                    ${isCurrent ? "text-primary" : isCompleted ? "text-foreground" : "text-muted-foreground"}
+                  `}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
+  const generatePreviewContent = () => {
+    const toneDescriptions = {
+      professional:
+        "This document maintains a formal, business-appropriate tone with precise language and structured formatting.",
+      friendly: "This document uses a warm, approachable tone while maintaining professionalism and clarity.",
+      formal:
+        "This document follows strict formal conventions with elevated language and traditional business etiquette.",
+      casual: "This document takes a relaxed, conversational approach while conveying all necessary information.",
+    }
+
+    if (documentType === "Invoice") {
+      return (
+        <div className="space-y-6 bg-white p-8 rounded-lg shadow-sm">
+          <div className="text-center pb-4 border-b-2 border-gray-200">
+            <h1 className="text-4xl font-bold text-primary mb-2">{documentTitle}</h1>
+            <p className="text-sm text-gray-600">Invoice #{formData.invoiceNumber || "INV-001"}</p>
+          </div>
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-bold text-sm text-gray-500 mb-2">BILL TO</h3>
+              <p className="font-semibold text-lg">{formData.clientInfo?.name || "Client Name"}</p>
+              <p className="text-sm text-gray-600">{formData.clientInfo?.address || "Client Address"}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-200">
+              <div>
+                <span className="text-sm text-gray-500">Invoice Date:</span>
+                <p className="font-medium">{formData.invoiceDate || "YYYY-MM-DD"}</p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500">Due Date:</span>
+                <p className="font-medium">{formData.dueDate || "YYYY-MM-DD"}</p>
+              </div>
+            </div>
+            <div className="bg-primary/5 p-6 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-semibold">Total Amount Due</span>
+                <span className="text-3xl font-bold text-primary">${formData.totalAmount || "0.00"}</span>
+              </div>
+            </div>
+            <div className="mt-6 p-4 bg-gray-50 rounded-md text-sm border border-gray-200">
+              <p className="text-xs text-gray-500 mb-1">DOCUMENT TONE</p>
+              <p className="italic text-gray-700">{toneDescriptions[tone as keyof typeof toneDescriptions]}</p>
+            </div>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Contract") {
+      return (
+        <div className="space-y-6 bg-white p-8 rounded-lg shadow-sm">
+          <div className="text-center pb-4 border-b-2 border-gray-200">
+            <h1 className="text-4xl font-bold text-primary mb-2">{documentTitle}</h1>
+            <p className="text-sm text-gray-600 uppercase tracking-wide">{formData.contractTitle || "Agreement"}</p>
+          </div>
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-bold text-lg mb-3 text-primary">RECITALS</h3>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {formData.recitals ||
+                  "This agreement sets forth the terms and conditions between the parties herein..."}
+              </p>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg mb-3 text-primary">DURATION & TERM</h3>
+              <p className="text-sm text-gray-700">
+                {formData.duration || "12 months from the effective date of this agreement"}
+              </p>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg mb-3 text-primary">PAYMENT TERMS</h3>
+              <p className="text-sm text-gray-700">
+                {formData.paymentTerms ||
+                  "As mutually agreed upon by both parties in accordance with the terms outlined herein"}
+              </p>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg mb-3 text-primary">TERMINATION</h3>
+              <p className="text-sm text-gray-700">
+                {formData.terminationClause ||
+                  "Either party may terminate this agreement with written notice as specified"}
+              </p>
+            </div>
+            <div className="mt-8 p-4 bg-gray-50 rounded-md text-sm border border-gray-200">
+              <p className="text-xs text-gray-500 mb-1">DOCUMENT TONE</p>
+              <p className="italic text-gray-700">{toneDescriptions[tone as keyof typeof toneDescriptions]}</p>
+            </div>
+          </div>
+        </div>
+      )
+    } else {
+      // Generic preview for other document types
+      return (
+        <div className="space-y-6 bg-white p-8 rounded-lg shadow-sm">
+          <div className="text-center pb-4 border-b-2 border-gray-200">
+            <h1 className="text-4xl font-bold text-primary mb-2">{documentTitle}</h1>
+            <p className="text-sm text-gray-600 uppercase tracking-wide">{documentType}</p>
+          </div>
+          <div className="space-y-6">
+            <p className="text-gray-700 leading-relaxed">
+              This is your finalized {documentType.toLowerCase()} with a {tone} tone applied throughout the document.
+              All the details you've entered have been formatted professionally and are ready for use.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(formData)
+                .filter(
+                  ([key]) =>
+                    !["documentType", "id", "createdAt", "updatedAt", "author", "status", "title", "tone"].includes(
+                      key,
+                    ),
+                )
+                .slice(0, 6)
+                .map(([key, value]) => (
+                  <div key={key} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-gray-500 text-xs mb-1 uppercase tracking-wide">
+                      {key.replace(/([A-Z])/g, " $1").trim()}
+                    </p>
+                    <p className="font-semibold text-gray-800 truncate">{String(value)}</p>
+                  </div>
+                ))}
+            </div>
+            <div className="mt-8 p-4 bg-gray-50 rounded-md text-sm border border-gray-200">
+              <p className="text-xs text-gray-500 mb-1">DOCUMENT TONE</p>
+              <p className="italic text-gray-700">{toneDescriptions[tone as keyof typeof toneDescriptions]}</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+  }
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <h3 className="text-xl font-bold flex items-center gap-2">
+          <Sparkles className="h-6 w-6 text-primary" />
+          Final Document
+        </h3>
+        <div className="text-xs text-gray-500 bg-primary/10 px-3 py-1 rounded-full">AI Generated</div>
+      </div>
+      <div className="flex-1 overflow-auto">{generatePreviewContent()}</div>
+    </div>
+  )
+}
+
+export default function CreateDocumentPage() {
   const { toast } = useToast()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const [currentStep, setCurrentStep] = useState(1)
   const [documentType, setDocumentType] = useState<DocumentType | "Other" | "">("")
   const [customDocumentType, setCustomDocumentType] = useState("")
+  const [tone, setTone] = useState<"professional" | "friendly" | "formal" | "casual">("professional")
   const [documentTitle, setDocumentTitle] = useState("")
   const [formData, setFormData] = useState<any>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showPreview, setShowPreview] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [editingDocId, setEditingDocId] = useState<string | null>(null)
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
+  // Removed step indicator logic from useEffects
+  // useEffect(() => {
+  //   const newCompletedSteps = new Set<number>()
+
+  //   if (documentType) {
+  //     newCompletedSteps.add(1)
+  //     if (documentTitle && documentTitle.trim().length >= 3) {
+  //       newCompletedSteps.add(2)
+
+  //       // Check if details are filled
+  //       const hasDetails = Object.keys(formData).some((key) => {
+  //         if (["documentType", "id", "createdAt", "updatedAt", "author", "status"].includes(key)) return false
+  //         return formData[key] && formData[key] !== ""
+  //       })
+
+  //       if (hasDetails) {
+  //         newCompletedSteps.add(3)
+  //       }
+  //     }
+  //   }
+
+  //   setCompletedSteps(newCompletedSteps)
+
+  //   // Auto-advance current step
+  //   if (!documentType) {
+  //     setCurrentStep(1)
+  //   } else if (!documentTitle || documentTitle.trim().length < 3) {
+  //     setCurrentStep(2)
+  //   } else if (newCompletedSteps.has(3)) {
+  //     setCurrentStep(4)
+  //   } else {
+  //     setCurrentStep(3)
+  //   }
+  // }, [documentType, documentTitle, formData])
+
+  useEffect(() => {
+    const editId = searchParams.get("edit")
+    if (editId) {
+      const stored = localStorage.getItem("modocs_documents")
+      if (stored) {
+        const docs = JSON.parse(stored)
+        const doc = docs.find((d: any) => d.id === editId)
+        if (doc) {
+          setDocumentType(doc.documentType)
+          if (doc.documentType === "Other") {
+            setCustomDocumentType(doc.customDocumentType || "")
+          }
+          setDocumentTitle(doc.title || "")
+          setTone(doc.tone || "professional")
+          setFormData(doc)
+          setEditingDocId(doc.id)
+          // Navigate to step 3 (Fill in Details)
+          setCurrentStep(3)
+        }
+      }
+    }
+  }, [searchParams])
+
   useEffect(() => {
     const docToEdit = sessionStorage.getItem("modocs_edit_document")
     if (docToEdit) {
       const doc = JSON.parse(docToEdit)
       setDocumentType(doc.documentType)
+      if (doc.documentType === "Other") {
+        setCustomDocumentType(doc.customDocumentType || "")
+      }
       setDocumentTitle(doc.title || "")
+      setTone(doc.tone || "professional")
       setFormData(doc)
       setEditingDocId(doc.id)
+      setCurrentStep(3)
       sessionStorage.removeItem("modocs_edit_document")
     }
   }, [])
@@ -74,7 +358,7 @@ export default function CreatePage() {
       const hasContent =
         documentTitle ||
         Object.keys(formData).some((key) => {
-          if (["documentType", "id", "createdAt", "updatedAt", "author", "status"].includes(key)) return false
+          if (["documentType", "id", "createdAt", "updatedAt", "author", "status", "tone"].includes(key)) return false
           return formData[key] && formData[key] !== ""
         })
 
@@ -83,6 +367,7 @@ export default function CreatePage() {
       const inProgressDoc = {
         ...formData,
         title: documentTitle || "Untitled Document",
+        tone,
         status: "in-progress",
         updatedAt: new Date().toISOString(),
       }
@@ -110,7 +395,7 @@ export default function CreatePage() {
 
     const debounceTimer = setTimeout(saveInProgress, 1000)
     return () => clearTimeout(debounceTimer)
-  }, [documentTitle, formData, documentType, editingDocId])
+  }, [documentTitle, formData, documentType, editingDocId, tone])
 
   const handleNavigation = (path: string) => {
     if (hasUnsavedChanges && formData.status !== "completed") {
@@ -125,7 +410,8 @@ export default function CreatePage() {
     const inProgressDoc = {
       ...formData,
       title: documentTitle || "Untitled Document",
-      status: "in-progress",
+      tone,
+      status: "In Progress",
       updatedAt: new Date().toISOString(),
     }
 
@@ -146,7 +432,7 @@ export default function CreatePage() {
       }
     }
 
-    localStorage.setItem("modocs_documents", JSON.stringify(docs))
+    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
     window.dispatchEvent(new Event("storage"))
 
     setHasUnsavedChanges(false)
@@ -164,9 +450,7 @@ export default function CreatePage() {
 
   const handleDocumentTypeChange = (type: DocumentType | "Other") => {
     setDocumentType(type)
-    setDocumentTitle("")
-    setCustomDocumentType("")
-    setErrors({})
+    setErrors({}) // Clear errors when type changes
     setFormData({
       documentType: type,
       id: editingDocId || `doc-${Date.now()}`,
@@ -174,6 +458,94 @@ export default function CreatePage() {
       updatedAt: new Date().toISOString(),
       author: "Current User",
       status: "in-progress",
+      tone,
+    })
+    // If custom type is selected, clear it if it's not 'Other'
+    if (type !== "Other") {
+      setCustomDocumentType("")
+    }
+  }
+
+  const handleNext = () => {
+    if (currentStep === 1) {
+      if (!documentType) {
+        setErrors({ documentType: "Please select a document type" })
+        toast({
+          title: "Selection Required",
+          description: "Please select a document type to continue",
+          variant: "destructive",
+        })
+        return
+      }
+      if (documentType === "Other" && !customDocumentType.trim()) {
+        setErrors({ customDocumentType: "Please enter a custom document type" })
+        toast({
+          title: "Type Required",
+          description: "Please enter a custom document type",
+          variant: "destructive",
+        })
+        return
+      }
+    }
+
+    if (currentStep === 3) {
+      if (!documentTitle.trim()) {
+        setErrors({ documentTitle: "Document title is required" })
+        toast({
+          title: "Title Required",
+          description: "Please enter a document title",
+          variant: "destructive",
+        })
+        return
+      }
+      if (documentTitle.trim().length < 3) {
+        setErrors({ documentTitle: "Document title must be at least 3 characters" })
+        toast({
+          title: "Title Too Short",
+          description: "Document title must be at least 3 characters",
+          variant: "destructive",
+        })
+        return
+      }
+      if (!validateForm()) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields correctly",
+          variant: "destructive",
+        })
+        return
+      }
+    }
+
+    setErrors({})
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+      if (showPreview) {
+        setShowPreview(false)
+      }
+    }
+  }
+
+  const handleGenerate = () => {
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors in the form before generating",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setShowPreview(true)
+    toast({
+      title: "Document Generated!",
+      description: "Your document preview is now available",
     })
   }
 
@@ -182,6 +554,7 @@ export default function CreatePage() {
       ...prev,
       [field]: value,
     }))
+    // Clear specific error if field is corrected
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev }
@@ -203,6 +576,7 @@ export default function CreatePage() {
       return newData
     })
     const errorKey = path.join(".")
+    // Clear specific error if field is corrected
     if (errors[errorKey]) {
       setErrors((prev) => {
         const newErrors = { ...prev }
@@ -215,72 +589,34 @@ export default function CreatePage() {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
 
-    // Validate document title
+    // Title validation is already handled in handleNext, but good to have here too
     if (!documentTitle || documentTitle.trim() === "") {
       newErrors.documentTitle = "Document title is required"
     } else if (documentTitle.trim().length < 3) {
       newErrors.documentTitle = "Document title must be at least 3 characters"
-    } else if (documentTitle.length > 100) {
-      newErrors.documentTitle = "Document title must be less than 100 characters"
     }
 
-    if (documentType === "Other") {
-      if (!customDocumentType || customDocumentType.trim() === "") {
-        newErrors.customDocumentType = "Document type is required"
-      }
-      if (!formData.content || formData.content.trim() === "" || formData.content.trim().length < 10) {
-        newErrors.content = "Content must be at least 10 characters"
-      }
+    if (documentType === "Other" && (!customDocumentType || customDocumentType.trim() === "")) {
+      newErrors.customDocumentType = "Custom document type is required"
     }
 
     // Type-specific validation
     if (documentType === "Invoice") {
-      if (!formData.invoiceNumber || formData.invoiceNumber.trim() === "") {
-        newErrors.invoiceNumber = "Invoice number is required"
-      }
-      if (!formData.invoiceDate || formData.invoiceDate.trim() === "") {
-        newErrors.invoiceDate = "Invoice date is required"
-      }
-      if (!formData.companyInfo?.name || formData.companyInfo.name.trim() === "") {
-        newErrors["companyInfo.name"] = "Company name is required"
-      }
-      if (!formData.clientInfo?.name || formData.clientInfo.name.trim() === "") {
-        newErrors["clientInfo.name"] = "Client name is required"
-      }
-      if (!formData.totalAmount || formData.totalAmount <= 0) {
+      if (!formData.invoiceNumber?.trim()) newErrors.invoiceNumber = "Invoice number is required"
+      if (!formData.totalAmount || formData.totalAmount <= 0)
         newErrors.totalAmount = "Total amount must be greater than 0"
-      }
     } else if (documentType === "Contract") {
-      if (!formData.contractTitle || formData.contractTitle.trim() === "") {
-        newErrors.contractTitle = "Contract title is required"
-      }
-      if (!formData.recitals || formData.recitals.trim() === "" || formData.recitals.trim().length < 10) {
-        newErrors.recitals = "Recitals must be at least 10 characters"
-      }
-      if (!formData.duration || formData.duration.trim() === "") {
-        newErrors.duration = "Duration is required"
-      }
+      if (!formData.contractTitle?.trim()) newErrors.contractTitle = "Contract title is required"
+      if (!formData.duration?.trim()) newErrors.duration = "Duration is required"
     } else if (documentType === "Business Letter") {
-      if (!formData.recipientAddress || formData.recipientAddress.trim() === "") {
-        newErrors.recipientAddress = "Recipient address is required"
-      }
-      if (!formData.body || formData.body.trim() === "" || formData.body.trim().length < 10) {
-        newErrors.body = "Letter body must be at least 10 characters"
-      }
+      if (!formData.recipientAddress?.trim()) newErrors.recipientAddress = "Recipient address is required"
+      if (!formData.body?.trim()) newErrors.body = "Letter body is required"
     } else if (documentType === "Memo") {
-      if (!formData.to || formData.to.trim() === "") {
-        newErrors.to = "Recipient is required"
-      }
-      if (!formData.subject || formData.subject.trim() === "") {
-        newErrors.subject = "Subject is required"
-      }
-      if (!formData.mainContent || formData.mainContent.trim() === "" || formData.mainContent.trim().length < 10) {
-        newErrors.mainContent = "Main content must be at least 10 characters"
-      }
+      if (!formData.to?.trim()) newErrors.to = "'To' field is required"
+      if (!formData.subject?.trim()) newErrors.subject = "Subject is required"
+      if (!formData.mainContent?.trim()) newErrors.mainContent = "Main content is required"
     } else if (documentType === "Other") {
-      if (!formData.content || formData.content.trim() === "" || formData.content.trim().length < 10) {
-        newErrors.content = "Content must be at least 10 characters"
-      }
+      if (!formData.content?.trim()) newErrors.content = "Content is required"
     }
 
     setErrors(newErrors)
@@ -289,6 +625,7 @@ export default function CreatePage() {
 
   const handleSave = () => {
     if (!documentType) {
+      setErrors({ documentType: "Document type is required" })
       toast({
         title: "Validation Error",
         description: "Please select a document type",
@@ -300,7 +637,7 @@ export default function CreatePage() {
     if (!validateForm()) {
       toast({
         title: "Validation Error",
-        description: "Please fix the errors in the form",
+        description: "Please fix all errors before saving",
         variant: "destructive",
       })
       return
@@ -312,21 +649,20 @@ export default function CreatePage() {
       ...formData,
       documentType: finalDocumentType,
       title: documentTitle,
-      status: "completed",
+      tone,
+      status: "Completed",
       updatedAt: new Date().toISOString(),
     }
 
     const existingDocs = localStorage.getItem("modocs_documents")
-    const docs = existingDocs ? JSON.parse(existingDocs) : []
+    const docs = existingDocs ? JSON.JSON.parse(existingDocs) : []
 
     if (editingDocId) {
-      // Update existing document
       const index = docs.findIndex((d: any) => d.id === editingDocId)
       if (index !== -1) {
         docs[index] = documentData
       }
     } else {
-      // Check if document already exists (was in-progress)
       const existingIndex = docs.findIndex((d: any) => d.id === formData.id)
       if (existingIndex !== -1) {
         docs[existingIndex] = documentData
@@ -335,29 +671,111 @@ export default function CreatePage() {
       }
     }
 
-    localStorage.setItem("modocs_documents", JSON.stringify(docs))
+    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
+    window.dispatchEvent(new Event("storage"))
+    setHasUnsavedChanges(false)
+    setShowSuccessMessage(true)
+  }
 
-    // Download as JSON
+  const handleDownloadJSON = () => {
+    const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
+    const documentData = {
+      ...formData,
+      documentType: finalDocumentType,
+      title: documentTitle,
+      tone,
+      status: "Completed",
+      updatedAt: new Date().toISOString(),
+    }
+
     const blob = new Blob([JSON.stringify(documentData, null, 2)], { type: "application/json" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "output.json"
+    a.download = `${documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
     toast({
-      title: "Document Saved!",
-      description: "Your document has been saved as output.json",
+      title: "JSON Downloaded",
+      description: "Your document has been downloaded as JSON",
     })
+  }
 
-    // Trigger storage event for other tabs
-    window.dispatchEvent(new Event("storage"))
+  const handleDownloadPDF = () => {
+    // Note: This creates a simple HTML representation for PDF printing
+    const printWindow = window.open("", "", "height=800,width=800")
+    if (!printWindow) return
 
-    setHasUnsavedChanges(false)
-    setShowSuccessMessage(true)
+    const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${documentTitle}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              max-width: 800px;
+              margin: 40px auto;
+              padding: 20px;
+              line-height: 1.6;
+            }
+            h1 {
+              color: #2663eb;
+              border-bottom: 3px solid #2663eb;
+              padding-bottom: 10px;
+            }
+            .meta {
+              color: #666;
+              font-size: 14px;
+              margin-bottom: 20px;
+            }
+            .section {
+              margin: 20px 0;
+            }
+            .label {
+              font-weight: bold;
+              color: #333;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${documentTitle}</h1>
+          <div class="meta">Document Type: ${finalDocumentType} | Tone: ${tone}</div>
+          ${Object.entries(formData)
+            .filter(
+              ([key]) =>
+                !["documentType", "id", "createdAt", "updatedAt", "author", "status", "title", "tone"].includes(key),
+            )
+            .map(
+              ([key, value]) => `
+              <div class="section">
+                <span class="label">${key.replace(/([A-Z])/g, " $1").trim()}:</span>
+                <span>${value}</span>
+              </div>
+            `,
+            )
+            .join("")}
+        </body>
+      </html>
+    `)
+
+    printWindow.document.close()
+    printWindow.focus()
+
+    setTimeout(() => {
+      printWindow.print()
+      printWindow.close()
+    }, 250)
+
+    toast({
+      title: "PDF Ready",
+      description: "Opening print dialog for PDF save",
+    })
   }
 
   const renderFormFields = () => {
@@ -383,14 +801,7 @@ export default function CreatePage() {
           />
         )
       case "Contract":
-        return (
-          <ContractForm
-            data={formData}
-            onChange={handleInputChange}
-            onNestedChange={handleNestedInputChange}
-            errors={errors}
-          />
-        )
+        return <ContractForm data={formData} onChange={handleInputChange} errors={errors} />
       case "Business Letter":
         return <BusinessLetterForm data={formData} onChange={handleInputChange} errors={errors} />
       case "Memo":
@@ -475,9 +886,12 @@ export default function CreatePage() {
                     setDocumentType("")
                     setDocumentTitle("")
                     setCustomDocumentType("")
+                    setTone("professional")
                     setFormData({})
                     setErrors({})
                     setEditingDocId(null)
+                    setCurrentStep(1)
+                    setShowPreview(false)
                   }}
                 >
                   Create Another Document
@@ -528,127 +942,267 @@ export default function CreatePage() {
                   <span className="hidden sm:inline">Manage Documents</span>
                 </Button>
               </button>
-              <Button onClick={handleSave} className="gap-2" disabled={!documentType}>
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">Save Document</span>
-                <span className="sm:hidden">Save</span>
-              </Button>
+              {showPreview && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="gap-2">
+                      <Download className="h-4 w-4" />
+                      <span className="hidden sm:inline">Download</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleDownloadPDF}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Download as PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownloadJSON}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Download as JSON
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              {showPreview && (
+                <Button onClick={handleSave} className="gap-2" variant="default">
+                  <Check className="h-4 w-4" />
+                  <span className="hidden sm:inline">Save Document</span>
+                  <span className="sm:hidden">Save</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Create Form */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h2 className="text-4xl font-bold text-foreground mb-2">Create Document</h2>
-          <p className="text-muted-foreground text-lg">Select a document type and fill in the details</p>
-        </div>
+      {/* Step Indicator */}
+      <StepIndicator currentStep={currentStep} />
 
-        {/* Document Type Selection */}
-        <Card className="border-border bg-card mb-6">
-          <CardHeader>
-            <CardTitle className="text-foreground">Document Type</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Choose the type of document you want to create
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Type *</Label>
-              <Select value={documentType} onValueChange={handleDocumentTypeChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select document type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Invoice">Invoice</SelectItem>
-                  <SelectItem value="Purchase Order">Purchase Order</SelectItem>
-                  <SelectItem value="Contract">Contract / Agreement</SelectItem>
-                  <SelectItem value="Business Letter">Business Letter</SelectItem>
-                  <SelectItem value="Memo">Memo</SelectItem>
-                  <SelectItem value="Report">Report</SelectItem>
-                  <SelectItem value="Financial Statement">Financial Statement</SelectItem>
-                  <SelectItem value="Work Order">Work Order</SelectItem>
-                  <SelectItem value="Proposal">Proposal</SelectItem>
-                  <SelectItem value="Receipt">Receipt</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {documentType === "Other" && (
-              <div>
-                <Label htmlFor="customDocumentType">Custom Document Type *</Label>
-                <Input
-                  id="customDocumentType"
-                  value={customDocumentType}
-                  onChange={(e) => {
-                    setCustomDocumentType(e.target.value)
-                    if (errors.customDocumentType) {
-                      setErrors((prev) => {
-                        const newErrors = { ...prev }
-                        delete newErrors.customDocumentType
-                        return newErrors
-                      })
-                    }
-                  }}
-                  placeholder="e.g., Policy Document, Meeting Minutes"
-                  className={errors.customDocumentType ? "border-destructive" : ""}
-                />
-                {errors.customDocumentType && (
-                  <p className="text-sm text-destructive mt-1">{errors.customDocumentType}</p>
-                )}
-              </div>
+      {/* Main Content */}
+      <section
+        className={`mx-auto px-4 sm:px-6 lg:px-8 py-12 transition-all duration-500 ${showPreview ? "max-w-7xl" : "max-w-3xl"}`}
+      >
+        {!showPreview ? (
+          <div className="space-y-6">
+            {/* Step 1: Select Type */}
+            {currentStep === 1 && (
+              <Card className="border-border bg-card">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Select Document Type</CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Choose the type of document you want to create
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {[
+                      "Invoice",
+                      "Purchase Order",
+                      "Contract",
+                      "Business Letter",
+                      "Memo",
+                      "Report",
+                      "Financial Statement",
+                      "Work Order",
+                      "Proposal",
+                      "Receipt",
+                    ].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => handleDocumentTypeChange(type as DocumentType)}
+                        className={`p-4 rounded-lg border-2 transition-all hover:border-primary/50 ${
+                          documentType === type ? "border-primary bg-primary/5" : "border-border bg-card"
+                        }`}
+                      >
+                        <FileText className="h-6 w-6 mb-2 text-primary mx-auto" />
+                        <p className="text-sm font-medium text-center">{type}</p>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handleDocumentTypeChange("Other")}
+                      className={`p-4 rounded-lg border-2 transition-all hover:border-primary/50 ${
+                        documentType === "Other" ? "border-primary bg-primary/5" : "border-border bg-card"
+                      }`}
+                    >
+                      <FileText className="h-6 w-6 mb-2 text-primary mx-auto" />
+                      <p className="text-sm font-medium text-center">Other</p>
+                    </button>
+                  </div>
+                  {documentType === "Other" && (
+                    <div className="mt-4 pt-4 border-t">
+                      <Label htmlFor="customType" className="text-sm font-medium">
+                        Enter Custom Document Type *
+                      </Label>
+                      <Input
+                        id="customType"
+                        value={customDocumentType}
+                        onChange={(e) => {
+                          setCustomDocumentType(e.target.value)
+                          if (errors.customDocumentType) {
+                            setErrors((prev) => {
+                              const newErrors = { ...prev }
+                              delete newErrors.customDocumentType
+                              return newErrors
+                            })
+                          }
+                        }}
+                        placeholder="e.g., Policy Document, Meeting Minutes"
+                        className={`mt-2 ${errors.customDocumentType ? "border-destructive" : ""}`}
+                      />
+                      {errors.customDocumentType && (
+                        <p className="text-sm text-destructive mt-1">{errors.customDocumentType}</p>
+                      )}
+                    </div>
+                  )}
+                  {errors.documentType && <p className="text-sm text-destructive mt-2">{errors.documentType}</p>}
+                </CardContent>
+              </Card>
             )}
-          </CardContent>
-        </Card>
 
-        {/* Removed duplicate Card for custom document type from updates */}
+            {/* Step 2: Select Tone */}
+            {currentStep === 2 && (
+              <Card className="border-border bg-card">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Select Tone</CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Choose how your document should sound
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { value: "professional", label: "Professional", desc: "Formal and business-appropriate" },
+                      { value: "friendly", label: "Friendly", desc: "Warm and approachable" },
+                      { value: "formal", label: "Formal", desc: "Traditional and elevated" },
+                      { value: "casual", label: "Casual", desc: "Relaxed and conversational" },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setTone(option.value as any)}
+                        className={`p-4 border-2 transition-all hover:border-primary/50 rounded-lg text-center ${
+                          tone === option.value ? "border-primary bg-primary/5" : "border-border bg-card"
+                        }`}
+                      >
+                        <p className="font-semibold mb-1">{option.label}</p>
+                        <p className="text-sm text-muted-foreground">{option.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-        {documentType && (
-          <Card className="border-border bg-card mb-6">
-            <CardHeader>
-              <CardTitle className="text-foreground">Document Title</CardTitle>
-              <CardDescription className="text-muted-foreground">
-                Give your document a descriptive title
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <Label htmlFor="documentTitle">Title *</Label>
-                <Input
-                  id="documentTitle"
-                  value={documentTitle}
-                  onChange={(e) => {
-                    setDocumentTitle(e.target.value)
-                    if (errors.documentTitle) {
-                      setErrors((prev) => {
-                        const newErrors = { ...prev }
-                        delete newErrors.documentTitle
-                        return newErrors
-                      })
-                    }
-                  }}
-                  placeholder="e.g., Q4 2024 Consulting Agreement"
-                  className={errors.documentTitle ? "border-destructive" : ""}
-                />
-                {errors.documentTitle && <p className="text-sm text-destructive mt-1">{errors.documentTitle}</p>}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            {/* Step 3: Fill Details */}
+            {currentStep === 3 && (
+              <>
+                <Card className="border-border bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-foreground">Document Title</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      value={documentTitle}
+                      onChange={(e) => {
+                        setDocumentTitle(e.target.value)
+                        if (errors.documentTitle) {
+                          setErrors((prev) => {
+                            const newErrors = { ...prev }
+                            delete newErrors.documentTitle
+                            return newErrors
+                          })
+                        }
+                      }}
+                      placeholder="e.g., Q4 2024 Consulting Agreement"
+                      className={errors.documentTitle ? "border-destructive" : ""}
+                    />
+                    {errors.documentTitle && <p className="text-sm text-destructive mt-1">{errors.documentTitle}</p>}
+                  </CardContent>
+                </Card>
+                {renderFormFields()}
+              </>
+            )}
 
-        {/* Dynamic Form Fields */}
-        {renderFormFields()}
+            {/* Step 4: Generate */}
+            {currentStep === 4 && (
+              <Card className="border-border bg-card">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Ready to Generate</CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Click generate to create your {documentType} with a {tone} tone
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">Document Summary</h4>
+                      <dl className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <dt className="text-muted-foreground">Type:</dt>
+                          <dd className="font-medium">
+                            {documentType === "Other" ? customDocumentType : documentType}
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-muted-foreground">Title:</dt>
+                          <dd className="font-medium">{documentTitle}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-muted-foreground">Tone:</dt>
+                          <dd className="font-medium capitalize">{tone}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                    <Button onClick={handleGenerate} className="w-full gap-2" size="lg">
+                      <Sparkles className="h-5 w-5" />
+                      Generate Document
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-        {documentType && (
-          <div className="mt-8 flex justify-end gap-4">
-            <Link href="/modocs">
-              <Button variant="outline">Cancel</Button>
-            </Link>
-            <Button onClick={handleSave} className="gap-2">
-              <Download className="h-4 w-4" />
-              Save Document
-            </Button>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between gap-4 pt-4">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={currentStep === 1}
+                className="gap-2 bg-transparent"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Back
+              </Button>
+              {currentStep < 4 && (
+                <Button onClick={handleNext} className="gap-2">
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-card border border-border rounded-lg p-8 shadow-lg">
+              <DocumentPreview
+                formData={formData}
+                documentType={documentType === "Other" ? customDocumentType : documentType}
+                documentTitle={documentTitle}
+                tone={tone}
+              />
+            </div>
+            <div className="flex justify-center gap-4 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowPreview(false)
+                  setCurrentStep(3)
+                }}
+                className="gap-2 bg-transparent"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Back to Edit
+              </Button>
+            </div>
           </div>
         )}
       </section>
@@ -676,121 +1230,11 @@ function InvoiceForm({ data, onChange, onNestedChange, errors }: any) {
               {errors?.invoiceNumber && <p className="text-sm text-destructive mt-1">{errors.invoiceNumber}</p>}
             </div>
             <div>
-              <Label>Invoice Date *</Label>
+              <Label>Invoice Date</Label>
               <Input
                 type="date"
                 value={data.invoiceDate || ""}
                 onChange={(e) => onChange("invoiceDate", e.target.value)}
-                className={errors?.invoiceDate ? "border-destructive" : ""}
-              />
-              {errors?.invoiceDate && <p className="text-sm text-destructive mt-1">{errors.invoiceDate}</p>}
-            </div>
-            <div>
-              <Label>Due Date</Label>
-              <Input type="date" value={data.dueDate || ""} onChange={(e) => onChange("dueDate", e.target.value)} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Company Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Company Name *</Label>
-            <Input
-              value={data.companyInfo?.name || ""}
-              onChange={(e) => onNestedChange(["companyInfo", "name"], e.target.value)}
-              placeholder="Your Company LLC"
-              className={errors?.["companyInfo.name"] ? "border-destructive" : ""}
-            />
-            {errors?.["companyInfo.name"] && (
-              <p className="text-sm text-destructive mt-1">{errors["companyInfo.name"]}</p>
-            )}
-          </div>
-          <div>
-            <Label>Address</Label>
-            <Textarea
-              value={data.companyInfo?.address || ""}
-              onChange={(e) => onNestedChange(["companyInfo", "address"], e.target.value)}
-              rows={2}
-              placeholder="123 Business St, Suite 100, City, State 12345"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Phone</Label>
-              <Input
-                value={data.companyInfo?.phone || ""}
-                onChange={(e) => onNestedChange(["companyInfo", "phone"], e.target.value)}
-                placeholder="+1 (555) 123-4567"
-              />
-            </div>
-            <div>
-              <Label>Email</Label>
-              <Input
-                value={data.companyInfo?.email || ""}
-                onChange={(e) => onNestedChange(["companyInfo", "email"], e.target.value)}
-                placeholder="billing@yourcompany.com"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Client Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Client Name *</Label>
-            <Input
-              value={data.clientInfo?.name || ""}
-              onChange={(e) => onNestedChange(["clientInfo", "name"], e.target.value)}
-              placeholder="Client Company Inc"
-              className={errors?.["clientInfo.name"] ? "border-destructive" : ""}
-            />
-            {errors?.["clientInfo.name"] && (
-              <p className="text-sm text-destructive mt-1">{errors["clientInfo.name"]}</p>
-            )}
-          </div>
-          <div>
-            <Label>Address</Label>
-            <Textarea
-              value={data.clientInfo?.address || ""}
-              onChange={(e) => onNestedChange(["clientInfo", "address"], e.target.value)}
-              rows={2}
-              placeholder="456 Client Ave, City, State 67890"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Financial Summary</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label>Subtotal</Label>
-              <Input
-                type="number"
-                value={data.subtotal || ""}
-                onChange={(e) => onChange("subtotal", e.target.value ? Number.parseFloat(e.target.value) : "")}
-                placeholder="10000.00"
-              />
-            </div>
-            <div>
-              <Label>Tax Amount</Label>
-              <Input
-                type="number"
-                value={data.taxAmount || ""}
-                onChange={(e) => onChange("taxAmount", e.target.value ? Number.parseFloat(e.target.value) : "")}
-                placeholder="800.00"
               />
             </div>
             <div>
@@ -804,24 +1248,31 @@ function InvoiceForm({ data, onChange, onNestedChange, errors }: any) {
               />
               {errors?.totalAmount && <p className="text-sm text-destructive mt-1">{errors.totalAmount}</p>}
             </div>
+            <div>
+              <Label>Due Date</Label>
+              <Input type="date" value={data.dueDate || ""} onChange={(e) => onChange("dueDate", e.target.value)} />
+            </div>
           </div>
-          <div>
-            <Label>Payment Terms</Label>
-            <Textarea
-              value={data.paymentTerms || ""}
-              onChange={(e) => onChange("paymentTerms", e.target.value)}
-              rows={2}
-              placeholder="Payment due within 30 days. Late payments subject to 1.5% monthly interest."
-            />
-          </div>
-          <div>
-            <Label>Notes</Label>
-            <Textarea
-              value={data.notes || ""}
-              onChange={(e) => onChange("notes", e.target.value)}
-              rows={3}
-              placeholder="Additional notes or special instructions"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="col-span-1 md:col-span-2">
+              <Label>Client Name *</Label>
+              <Input
+                value={data.clientInfo?.name || ""}
+                onChange={(e) => onNestedChange(["clientInfo", "name"], e.target.value)}
+                placeholder="John Doe"
+                className={errors?.clientInfo?.name ? "border-destructive" : ""}
+              />
+              {errors?.clientInfo?.name && <p className="text-sm text-destructive mt-1">{errors.clientInfo.name}</p>}
+            </div>
+            <div className="col-span-1 md:col-span-2">
+              <Label>Client Address</Label>
+              <Textarea
+                value={data.clientInfo?.address || ""}
+                onChange={(e) => onNestedChange(["clientInfo", "address"], e.target.value)}
+                rows={2}
+                placeholder="123 Main St, Anytown, USA 12345"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
