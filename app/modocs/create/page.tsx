@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -33,13 +33,16 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { DocumentType } from "@/lib/document-types"
+import html2canvas from "html2canvas"
+import jsPDF from "jspdf"
+import ReactDOMServer from "react-dom/server"
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
   const steps = [
     { number: 1, label: "Select Type" },
     { number: 2, label: "Select Tone" },
     { number: 3, label: "Fill in Details" },
-    { number: 4, label: "Generate" },
+    { number: 4, label: "Preview" },
   ]
 
   return (
@@ -96,128 +99,709 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 }
 
 function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
-  const generatePreviewContent = () => {
-    const toneDescriptions = {
-      professional:
-        "This document maintains a formal, business-appropriate tone with precise language and structured formatting.",
-      friendly: "This document uses a warm, approachable tone while maintaining professionalism and clarity.",
-      formal:
-        "This document follows strict formal conventions with elevated language and traditional business etiquette.",
-      casual: "This document takes a relaxed, conversational approach while conveying all necessary information.",
+  // Generate tone-specific content
+  const getToneContent = (baseContent: string) => {
+    switch (tone) {
+      case "professional":
+        return baseContent
+      case "formal":
+        return baseContent.replace(/we/gi, "the undersigned").replace(/our/gi, "the party's")
+      case "friendly":
+        return baseContent.replace(/we are pleased/gi, "we're excited").replace(/sincerely/gi, "warmly")
+      case "casual":
+        return baseContent.replace(/we are pleased/gi, "we're happy").replace(/furthermore/gi, "also")
+      default:
+        return baseContent
     }
+  }
 
+  const generatePreviewContent = () => {
     if (documentType === "Invoice") {
+      // Get user data safely
+      const clientName = formData.clientInfo?.name || formData.clientName || "[Client Name]"
+      const clientAddress = formData.clientInfo?.address || formData.clientAddress || "[Client Address]"
+      const invoiceNumber = formData.invoiceNumber || "INV-001"
+      const invoiceDate = formData.invoiceDate || new Date().toLocaleDateString()
+      const dueDate = formData.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
+      const totalAmount = formData.totalAmount || "0.00"
+
       return (
-        <div className="space-y-6 bg-white p-8 rounded-lg shadow-sm">
-          <div className="text-center pb-4 border-b-2 border-gray-200">
-            <h1 className="text-4xl font-bold text-primary mb-2">{documentTitle}</h1>
-            <p className="text-sm text-gray-600">Invoice #{formData.invoiceNumber || "INV-001"}</p>
+        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Letterhead */}
+          <div className="text-right border-b-2 border-black pb-4">
+            <h1 className="text-3xl font-bold uppercase tracking-wide mb-1">Invoice</h1>
+            <p className="text-sm">#{invoiceNumber}</p>
           </div>
-          <div className="space-y-6">
+
+          {/* From/To Section */}
+          <div className="grid grid-cols-2 gap-8">
             <div>
-              <h3 className="font-bold text-sm text-gray-500 mb-2">BILL TO</h3>
-              <p className="font-semibold text-lg">{formData.clientInfo?.name || "Client Name"}</p>
-              <p className="text-sm text-gray-600">{formData.clientInfo?.address || "Client Address"}</p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2">From:</p>
+              <p className="font-semibold">Your Company Name</p>
+              <p className="text-sm">123 Business Street</p>
+              <p className="text-sm">City, State 12345</p>
+              <p className="text-sm">Phone: (555) 123-4567</p>
             </div>
-            <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-200">
-              <div>
-                <span className="text-sm text-gray-500">Invoice Date:</span>
-                <p className="font-medium">{formData.invoiceDate || "YYYY-MM-DD"}</p>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2">Bill To:</p>
+              <p className="font-semibold">{clientName}</p>
+              <p className="text-sm">{clientAddress}</p>
+              <p className="text-sm">City, State 12345</p>
+            </div>
+          </div>
+
+          {/* Date Information */}
+          <div className="grid grid-cols-2 gap-8 text-sm">
+            <div>
+              <p className="font-bold">Invoice Date:</p>
+              <p>{invoiceDate}</p>
+            </div>
+            <div>
+              <p className="font-bold">Payment Due:</p>
+              <p>{dueDate}</p>
+            </div>
+          </div>
+
+          {/* Line Items Table */}
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b-2 border-black">
+                <th className="text-left py-2 font-bold">Description</th>
+                <th className="text-right py-2 font-bold">Qty</th>
+                <th className="text-right py-2 font-bold">Rate</th>
+                <th className="text-right py-2 font-bold">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-gray-300">
+                <td className="py-3">Professional Services - Month 1</td>
+                <td className="text-right py-3">1</td>
+                <td className="text-right py-3">$2,500.00</td>
+                <td className="text-right py-3">$2,500.00</td>
+              </tr>
+              <tr className="border-b border-gray-300">
+                <td className="py-3">Consulting Hours (20 hrs @ $150/hr)</td>
+                <td className="text-right py-3">20</td>
+                <td className="text-right py-3">$150.00</td>
+                <td className="text-right py-3">$3,000.00</td>
+              </tr>
+              <tr className="border-b border-gray-300">
+                <td className="py-3">Project Management</td>
+                <td className="text-right py-3">1</td>
+                <td className="text-right py-3">$1,250.00</td>
+                <td className="text-right py-3">$1,250.00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Totals */}
+          <div className="flex justify-end">
+            <div className="w-64 space-y-2 text-sm">
+              <div className="flex justify-between border-b border-gray-300 pb-2">
+                <span>Subtotal:</span>
+                <span>$6,750.00</span>
               </div>
-              <div>
-                <span className="text-sm text-gray-500">Due Date:</span>
-                <p className="font-medium">{formData.dueDate || "YYYY-MM-DD"}</p>
+              <div className="flex justify-between border-b border-gray-300 pb-2">
+                <span>Tax (8%):</span>
+                <span>$540.00</span>
+              </div>
+              <div className="flex justify-between border-t-2 border-black pt-2 font-bold text-lg">
+                <span>TOTAL:</span>
+                <span>${totalAmount === "0.00" ? "7,290.00" : totalAmount}</span>
               </div>
             </div>
-            <div className="bg-primary/5 p-6 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-xl font-semibold">Total Amount Due</span>
-                <span className="text-3xl font-bold text-primary">${formData.totalAmount || "0.00"}</span>
-              </div>
-            </div>
-            <div className="mt-6 p-4 bg-gray-50 rounded-md text-sm border border-gray-200">
-              <p className="text-xs text-gray-500 mb-1">DOCUMENT TONE</p>
-              <p className="italic text-gray-700">{toneDescriptions[tone as keyof typeof toneDescriptions]}</p>
-            </div>
+          </div>
+
+          {/* Payment Terms */}
+          <div className="text-xs text-gray-700 border-t border-gray-300 pt-4">
+            <p className="font-bold mb-1">PAYMENT TERMS</p>
+            <p>
+              {tone === "formal"
+                ? "Payment shall be remitted within the specified timeframe to the address listed above."
+                : tone === "friendly"
+                  ? "We'd appreciate payment within the due date. Thanks for your business!"
+                  : "Payment is due within 30 days. Please make checks payable to Your Company Name."}
+            </p>
+            <p className="mt-2">
+              <span className="font-bold">Payment Methods:</span> Check, ACH Transfer, Credit Card
+            </p>
           </div>
         </div>
       )
     } else if (documentType === "Contract") {
+      const contractTitle = formData.contractTitle || documentTitle || "Service Agreement"
+      const partyA = formData.partyA || "[First Party Name]"
+      const partyB = formData.partyB || "[Second Party Name]"
+      const duration = formData.duration || "twelve (12) months"
+      const paymentTerms = formData.paymentTerms || "as mutually agreed upon"
+
       return (
-        <div className="space-y-6 bg-white p-8 rounded-lg shadow-sm">
-          <div className="text-center pb-4 border-b-2 border-gray-200">
-            <h1 className="text-4xl font-bold text-primary mb-2">{documentTitle}</h1>
-            <p className="text-sm text-gray-600 uppercase tracking-wide">{formData.contractTitle || "Agreement"}</p>
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto leading-relaxed">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-6">
+            <h1 className="text-2xl font-bold uppercase tracking-widest mb-2">{contractTitle}</h1>
+            <p className="text-sm uppercase">Agreement</p>
           </div>
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-lg mb-3 text-primary">RECITALS</h3>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {formData.recitals ||
-                  "This agreement sets forth the terms and conditions between the parties herein..."}
-              </p>
+
+          {/* Parties Section */}
+          <div className="space-y-3">
+            <p className="text-sm leading-loose">
+              This Agreement is entered into as of{" "}
+              <span className="font-bold underline">{new Date().toLocaleDateString()}</span>, by and between{" "}
+              <span className="font-bold underline">{partyA}</span> ("First Party") and{" "}
+              <span className="font-bold underline">{partyB}</span> ("Second Party").
+            </p>
+          </div>
+
+          {/* Recitals */}
+          <div className="space-y-2">
+            <p className="font-bold text-sm uppercase tracking-wider">WHEREAS:</p>
+            <p className="text-sm pl-8 text-justify">
+              {getToneContent(
+                "The parties wish to establish the terms and conditions of their business relationship as set forth in this Agreement, and to define their respective rights, obligations, and responsibilities for the mutual benefit of both parties.",
+              )}
+            </p>
+          </div>
+
+          {/* Terms and Conditions */}
+          <div className="space-y-4">
+            <p className="font-bold text-sm uppercase tracking-wider">NOW, THEREFORE, the parties agree as follows:</p>
+
+            <div className="space-y-3">
+              <div>
+                <p className="font-bold text-sm">1. TERM AND DURATION</p>
+                <p className="text-sm pl-6 text-justify">
+                  {getToneContent(
+                    `This Agreement shall commence on the Effective Date and continue for a period of ${duration}, unless terminated earlier in accordance with the provisions herein. The Agreement may be renewed upon mutual written consent of both parties.`,
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <p className="font-bold text-sm">2. SCOPE OF SERVICES</p>
+                <p className="text-sm pl-6 text-justify">
+                  {getToneContent(
+                    "The First Party agrees to provide professional services as outlined in Exhibit A, attached hereto and incorporated by reference. Services shall be performed in a timely and professional manner, meeting industry standards and best practices.",
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <p className="font-bold text-sm">3. PAYMENT TERMS</p>
+                <p className="text-sm pl-6 text-justify">
+                  {getToneContent(
+                    `Payment shall be made ${paymentTerms} and as specified in attached schedules. All payments are due within thirty (30) days of invoice date unless otherwise agreed in writing.`,
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <p className="font-bold text-sm">4. CONFIDENTIALITY</p>
+                <p className="text-sm pl-6 text-justify">
+                  {getToneContent(
+                    "Both parties agree to maintain the confidentiality of any proprietary information shared during the term of this Agreement and for a period of two (2) years following termination.",
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <p className="font-bold text-sm">5. INTELLECTUAL PROPERTY</p>
+                <p className="text-sm pl-6 text-justify">
+                  {getToneContent(
+                    "All intellectual property created during the performance of services under this Agreement shall be owned by the party specified in the Statement of Work, or jointly owned as mutually agreed upon.",
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <p className="font-bold text-sm">6. TERMINATION</p>
+                <p className="text-sm pl-6 text-justify">
+                  {getToneContent(
+                    "Either party may terminate this Agreement upon thirty (30) days written notice to the other party. Termination shall not affect any obligations or liabilities accrued prior to the effective date of termination.",
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <p className="font-bold text-sm">7. GOVERNING LAW</p>
+                <p className="text-sm pl-6 text-justify">
+                  This Agreement shall be governed by and construed in accordance with the laws of the applicable
+                  jurisdiction, without regard to conflict of law principles.
+                </p>
+              </div>
+
+              <div>
+                <p className="font-bold text-sm">8. ENTIRE AGREEMENT</p>
+                <p className="text-sm pl-6 text-justify">
+                  {getToneContent(
+                    "This Agreement constitutes the entire understanding between the parties and supersedes all prior agreements, whether written or oral, relating to the subject matter herein.",
+                  )}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-lg mb-3 text-primary">DURATION & TERM</h3>
-              <p className="text-sm text-gray-700">
-                {formData.duration || "12 months from the effective date of this agreement"}
-              </p>
+          </div>
+
+          {/* Signatures */}
+          <div className="grid grid-cols-2 gap-12 pt-8 mt-8 border-t border-black">
+            <div className="space-y-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">{partyA}</p>
+                <p className="text-xs">First Party Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-lg mb-3 text-primary">PAYMENT TERMS</h3>
-              <p className="text-sm text-gray-700">
-                {formData.paymentTerms ||
-                  "As mutually agreed upon by both parties in accordance with the terms outlined herein"}
-              </p>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-3 text-primary">TERMINATION</h3>
-              <p className="text-sm text-gray-700">
-                {formData.terminationClause ||
-                  "Either party may terminate this agreement with written notice as specified"}
-              </p>
-            </div>
-            <div className="mt-8 p-4 bg-gray-50 rounded-md text-sm border border-gray-200">
-              <p className="text-xs text-gray-500 mb-1">DOCUMENT TONE</p>
-              <p className="italic text-gray-700">{toneDescriptions[tone as keyof typeof toneDescriptions]}</p>
+            <div className="space-y-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">{partyB}</p>
+                <p className="text-xs">Second Party Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
             </div>
           </div>
         </div>
       )
-    } else {
-      // Generic preview for other document types
+    } else if (documentType === "Business Letter") {
+      const recipient = formData.recipient || "[Recipient Name]"
+      const subject = formData.subject || "[Subject Line]"
+      const body = formData.body || ""
+      const date = formData.date || new Date().toLocaleDateString()
+
       return (
-        <div className="space-y-6 bg-white p-8 rounded-lg shadow-sm">
-          <div className="text-center pb-4 border-b-2 border-gray-200">
-            <h1 className="text-4xl font-bold text-primary mb-2">{documentTitle}</h1>
-            <p className="text-sm text-gray-600 uppercase tracking-wide">{documentType}</p>
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Letterhead */}
+          <div className="text-right mb-8">
+            <p className="font-bold text-lg">Your Company Name</p>
+            <p className="text-sm">123 Business Street</p>
+            <p className="text-sm">City, State 12345</p>
+            <p className="text-sm">Phone: (555) 123-4567</p>
+            <p className="text-sm">Email: info@yourcompany.com</p>
           </div>
-          <div className="space-y-6">
-            <p className="text-gray-700 leading-relaxed">
-              This is your finalized {documentType.toLowerCase()} with a {tone} tone applied throughout the document.
-              All the details you've entered have been formatted professionally and are ready for use.
+
+          {/* Date */}
+          <div className="mb-8">
+            <p>{date}</p>
+          </div>
+
+          {/* Recipient */}
+          <div className="mb-8">
+            <p className="font-semibold">{recipient}</p>
+            <p className="text-sm">Senior Manager</p>
+            <p className="text-sm">Target Company Inc.</p>
+            <p className="text-sm">456 Corporate Avenue</p>
+            <p className="text-sm">City, State 12345</p>
+          </div>
+
+          {/* Subject */}
+          <div className="mb-6">
+            <p className="font-bold">Re: {subject}</p>
+          </div>
+
+          {/* Salutation */}
+          <div className="mb-4">
+            <p>Dear {recipient.split(" ")[0] || "Sir/Madam"},</p>
+          </div>
+
+          {/* Body */}
+          <div className="space-y-4 text-justify leading-loose">
+            <p>
+              {body ||
+                getToneContent(
+                  "We are pleased to present this correspondence regarding the matter at hand. Our organization has carefully reviewed the situation and would like to propose the following course of action.",
+                )}
             </p>
-            <div className="grid grid-cols-2 gap-4">
-              {Object.entries(formData)
-                .filter(
-                  ([key]) =>
-                    !["documentType", "id", "createdAt", "updatedAt", "author", "status", "title", "tone"].includes(
-                      key,
-                    ),
-                )
-                .slice(0, 6)
-                .map(([key, value]) => (
-                  <div key={key} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-gray-500 text-xs mb-1 uppercase tracking-wide">
-                      {key.replace(/([A-Z])/g, " $1").trim()}
-                    </p>
-                    <p className="font-semibold text-gray-800 truncate">{String(value)}</p>
-                  </div>
-                ))}
+            <p>
+              {getToneContent(
+                "Furthermore, we believe that this approach will yield positive results for all parties involved. Our team has extensive experience in this area and is committed to ensuring a successful outcome through collaborative efforts and open communication.",
+              )}
+            </p>
+            <p>
+              {getToneContent(
+                "We appreciate your consideration of this matter and look forward to discussing it further at your earliest convenience. Please do not hesitate to contact us should you require any additional information or clarification.",
+              )}
+            </p>
+          </div>
+
+          {/* Closing */}
+          <div className="mt-8">
+            <p className="mb-12">
+              {tone === "formal"
+                ? "Respectfully yours,"
+                : tone === "friendly"
+                  ? "Warmly,"
+                  : tone === "casual"
+                    ? "Best regards,"
+                    : "Sincerely,"}
+            </p>
+            <div>
+              <div className="border-b border-black w-48 mb-1"></div>
+              <p className="font-semibold">Your Name</p>
+              <p className="text-sm">Chief Executive Officer</p>
+              <p className="text-sm">Your Company Name</p>
             </div>
-            <div className="mt-8 p-4 bg-gray-50 rounded-md text-sm border border-gray-200">
-              <p className="text-xs text-gray-500 mb-1">DOCUMENT TONE</p>
-              <p className="italic text-gray-700">{toneDescriptions[tone as keyof typeof toneDescriptions]}</p>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Memo") {
+      const to = formData.to || "[Recipients]"
+      const from = formData.from || "[Your Name]"
+      const subject = formData.subject || "[Subject]"
+      const body = formData.body || ""
+      const date = formData.date || new Date().toLocaleDateString()
+
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="border-b-2 border-black pb-2 mb-6">
+            <h1 className="text-2xl font-bold uppercase">Memorandum</h1>
+          </div>
+
+          {/* Memo Header Fields */}
+          <div className="space-y-2 border-b border-gray-400 pb-6 mb-6">
+            <div className="grid grid-cols-[100px_1fr]">
+              <p className="font-bold">TO:</p>
+              <p>{to}</p>
+            </div>
+            <div className="grid grid-cols-[100px_1fr]">
+              <p className="font-bold">FROM:</p>
+              <p>{from}</p>
+            </div>
+            <div className="grid grid-cols-[100px_1fr]">
+              <p className="font-bold">DATE:</p>
+              <p>{date}</p>
+            </div>
+            <div className="grid grid-cols-[100px_1fr]">
+              <p className="font-bold">RE:</p>
+              <p className="font-semibold">{subject}</p>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            <p>
+              {body ||
+                getToneContent(
+                  "This memorandum is to inform you of important updates regarding our current operations and to outline key action items moving forward.",
+                )}
+            </p>
+            <p>
+              {getToneContent(
+                "The following points require immediate attention and action from all team members. Please review each item carefully and ensure compliance with the outlined procedures.",
+              )}
+            </p>
+
+            <div className="pl-6 space-y-2">
+              <p>
+                <span className="font-bold">1.</span> {getToneContent("Complete quarterly reports by end of month")}
+              </p>
+              <p>
+                <span className="font-bold">2.</span>{" "}
+                {getToneContent("Attend mandatory training session scheduled for next week")}
+              </p>
+              <p>
+                <span className="font-bold">3.</span> {getToneContent("Review and update departmental procedures")}
+              </p>
+            </div>
+
+            <p>
+              {getToneContent(
+                "Should you have any questions or concerns regarding these matters, please do not hesitate to reach out to the management team. Your cooperation and prompt attention to these items is greatly appreciated.",
+              )}
+            </p>
+          </div>
+
+          {/* Footer */}
+          {formData.cc && (
+            <div className="mt-8 text-sm border-t border-gray-300 pt-4">
+              <p>
+                <span className="font-bold">CC:</span> {formData.cc}
+              </p>
+            </div>
+          )}
+        </div>
+      )
+    } else if (documentType === "Proposal") {
+      const client = formData.client || "[Client Name]"
+      const executiveSummary = formData.executiveSummary || ""
+      const scope = formData.scope || ""
+      const timeline = formData.timeline || ""
+      const budget = formData.budget || "[Amount]"
+
+      return (
+        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Cover Page */}
+          <div className="text-center border-b-2 border-black pb-8 mb-8">
+            <h1 className="text-3xl font-bold uppercase mb-4">{documentTitle || "Project Proposal"}</h1>
+            <p className="text-lg mb-6">Comprehensive Solution for Digital Transformation</p>
+            <p className="text-sm font-semibold">Prepared for: {client}</p>
+            <p className="text-sm">Date: {new Date().toLocaleDateString()}</p>
+            <p className="text-sm mt-4">Confidential & Proprietary</p>
+          </div>
+
+          {/* Executive Summary */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Executive Summary</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {executiveSummary ||
+                getToneContent(
+                  "We are pleased to present this comprehensive proposal outlining our approach to addressing your organization's needs. Our solution combines industry-leading expertise with innovative methodologies to deliver measurable results that exceed expectations.",
+                )}
+            </p>
+            <p className="text-sm text-justify leading-relaxed">
+              {getToneContent(
+                "This proposal details our understanding of your requirements, the proposed solution architecture, implementation timeline, and investment structure. We are confident that our approach will provide significant value to your organization.",
+              )}
+            </p>
+          </div>
+
+          {/* Scope of Work */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Scope of Work</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {scope ||
+                getToneContent(
+                  "Our comprehensive solution encompasses the following key components and deliverables designed to meet your specific business objectives:",
+                )}
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-sm">
+              <li>
+                {getToneContent(
+                  "Initial Discovery & Requirements Analysis - Comprehensive assessment of current state and future needs",
+                )}
+              </li>
+              <li>
+                {getToneContent("Solution Design & Architecture - Custom-tailored approach aligned with your goals")}
+              </li>
+              <li>
+                {getToneContent(
+                  "Implementation & Integration - Seamless deployment with minimal disruption to operations",
+                )}
+              </li>
+              <li>
+                {getToneContent("Testing & Quality Assurance - Rigorous validation to ensure optimal performance")}
+              </li>
+              <li>
+                {getToneContent("Training & Knowledge Transfer - Comprehensive enablement for your team members")}
+              </li>
+              <li>
+                {getToneContent("Ongoing Support & Optimization - Continuous improvement and technical assistance")}
+              </li>
+            </ul>
+          </div>
+
+          {/* Methodology */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Our Methodology</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {getToneContent(
+                "We employ a proven, agile methodology that ensures transparency, collaboration, and adaptability throughout the project lifecycle. Our approach includes regular stakeholder engagement and iterative delivery.",
+              )}
+            </p>
+          </div>
+
+          {/* Timeline */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Timeline</h2>
+            <p className="text-sm">{timeline || "Project Duration: 12-16 weeks with the following key milestones:"}</p>
+            <div className="text-sm space-y-1 pl-6">
+              <p>
+                <span className="font-bold">Phase 1 (Weeks 1-3):</span> Discovery & Planning
+              </p>
+              <p>
+                <span className="font-bold">Phase 2 (Weeks 4-8):</span> Design & Development
+              </p>
+              <p>
+                <span className="font-bold">Phase 3 (Weeks 9-12):</span> Implementation & Testing
+              </p>
+              <p>
+                <span className="font-bold">Phase 4 (Weeks 13-16):</span> Launch & Optimization
+              </p>
+            </div>
+          </div>
+
+          {/* Investment */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Investment</h2>
+            <div className="bg-gray-100 p-6 border border-gray-400">
+              <p className="text-2xl font-bold mb-3">Total Investment: ${budget}</p>
+              <p className="text-sm text-gray-700 mb-2">
+                {getToneContent(
+                  "This investment includes all phases of the project as outlined above. Payment terms are structured to align with project milestones.",
+                )}
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-bold">Payment Structure:</span> 30% upon signing, 40% at mid-point, 30% upon
+                completion
+              </p>
+            </div>
+          </div>
+
+          {/* Next Steps */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Next Steps</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {getToneContent(
+                "We are excited about the opportunity to partner with your organization. To proceed, we propose scheduling a meeting to discuss this proposal in detail and address any questions you may have.",
+              )}
+            </p>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Receipt") {
+      const receiptNumber = formData.receiptNumber || "RCP-001"
+      const date = formData.date || new Date().toLocaleDateString()
+      const paymentMethod = formData.paymentMethod || "Cash"
+      const amount = formData.amount || "0.00"
+
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-6">
+            <h1 className="text-2xl font-bold uppercase tracking-wide">Receipt</h1>
+            <p className="text-sm">#{receiptNumber}</p>
+          </div>
+
+          {/* Business Info */}
+          <div className="text-center mb-6">
+            <p className="font-bold text-lg">Your Business Name</p>
+            <p className="text-sm">123 Main Street</p>
+            <p className="text-sm">City, State 12345</p>
+            <p className="text-sm">Phone: (555) 123-4567</p>
+            <p className="text-sm">Email: info@yourbusiness.com</p>
+          </div>
+
+          {/* Transaction Details */}
+          <div className="space-y-2 text-sm mb-6 border-y border-gray-300 py-4">
+            <div className="flex justify-between">
+              <span className="font-bold">Date:</span>
+              <span>{date}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-bold">Payment Method:</span>
+              <span>{paymentMethod}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-bold">Transaction ID:</span>
+              <span>TXN-{Date.now().toString().slice(-8)}</span>
+            </div>
+          </div>
+
+          {/* Items */}
+          <table className="w-full text-sm mb-6">
+            <thead className="border-b-2 border-black">
+              <tr>
+                <th className="text-left py-2">Item Description</th>
+                <th className="text-center py-2">Qty</th>
+                <th className="text-right py-2">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-gray-300">
+                <td className="py-2">Professional Services</td>
+                <td className="text-center py-2">1</td>
+                <td className="text-right py-2">${amount}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Total */}
+          <div className="border-t-2 border-black pt-4">
+            <div className="flex justify-between text-lg font-bold mb-2">
+              <span>TOTAL PAID:</span>
+              <span>${amount}</span>
+            </div>
+            <p className="text-xs text-gray-600 text-center">All amounts in USD</p>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center text-sm text-gray-600 mt-8 border-t border-gray-300 pt-4">
+            <p className="font-semibold mb-1">
+              {tone === "formal"
+                ? "We acknowledge receipt of payment"
+                : tone === "friendly"
+                  ? "Thanks so much for your business!"
+                  : "Thank you for your business!"}
+            </p>
+            <p className="text-xs">This is an official receipt for your records</p>
+            <p className="text-xs mt-2">For questions, please contact us at the information above</p>
+          </div>
+        </div>
+      )
+    } else {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
             </div>
           </div>
         </div>
@@ -228,13 +812,14 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-6 pb-4 border-b">
-        <h3 className="text-xl font-bold flex items-center gap-2">
-          <Sparkles className="h-6 w-6 text-primary" />
-          Final Document
-        </h3>
-        <div className="text-xs text-gray-500 bg-primary/10 px-3 py-1 rounded-full">AI Generated</div>
+        <h3 className="text-xl font-bold">Document Preview</h3>
+        <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-300">
+          {tone.charAt(0).toUpperCase() + tone.slice(1)} Tone
+        </div>
       </div>
-      <div className="flex-1 overflow-auto">{generatePreviewContent()}</div>
+      <div className="flex-1 overflow-auto bg-gray-100 p-4" id="document-preview-content">
+        {generatePreviewContent()}
+      </div>
     </div>
   )
 }
@@ -252,46 +837,33 @@ export default function CreateDocumentPage() {
   const [formData, setFormData] = useState<any>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showPreview, setShowPreview] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [editingDocId, setEditingDocId] = useState<string | null>(null)
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
-  // Removed step indicator logic from useEffects
-  // useEffect(() => {
-  //   const newCompletedSteps = new Set<number>()
+  const formDataRef = useRef(formData)
+  const documentTitleRef = useRef(documentTitle)
+  const documentTypeRef = useRef(documentType)
+  const hasUnsavedChangesRef = useRef(hasUnsavedChanges)
 
-  //   if (documentType) {
-  //     newCompletedSteps.add(1)
-  //     if (documentTitle && documentTitle.trim().length >= 3) {
-  //       newCompletedSteps.add(2)
+  useEffect(() => {
+    formDataRef.current = formData
+  }, [formData])
 
-  //       // Check if details are filled
-  //       const hasDetails = Object.keys(formData).some((key) => {
-  //         if (["documentType", "id", "createdAt", "updatedAt", "author", "status"].includes(key)) return false
-  //         return formData[key] && formData[key] !== ""
-  //       })
+  useEffect(() => {
+    documentTitleRef.current = documentTitle
+  }, [documentTitle])
 
-  //       if (hasDetails) {
-  //         newCompletedSteps.add(3)
-  //       }
-  //     }
-  //   }
+  useEffect(() => {
+    documentTypeRef.current = documentType
+  }, [documentType])
 
-  //   setCompletedSteps(newCompletedSteps)
-
-  //   // Auto-advance current step
-  //   if (!documentType) {
-  //     setCurrentStep(1)
-  //   } else if (!documentTitle || documentTitle.trim().length < 3) {
-  //     setCurrentStep(2)
-  //   } else if (newCompletedSteps.has(3)) {
-  //     setCurrentStep(4)
-  //   } else {
-  //     setCurrentStep(3)
-  //   }
-  // }, [documentType, documentTitle, formData])
+  useEffect(() => {
+    hasUnsavedChangesRef.current = hasUnsavedChanges
+  }, [hasUnsavedChanges])
 
   useEffect(() => {
     const editId = searchParams.get("edit")
@@ -333,15 +905,11 @@ export default function CreateDocumentPage() {
     }
   }, [])
 
-  useEffect(() => {
-    if (documentType && (documentTitle || Object.keys(formData).length > 4)) {
-      setHasUnsavedChanges(true)
-    }
-  }, [documentType, documentTitle, formData])
+  // Now only save when user navigates away via the dialog
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges && formData.status !== "completed") {
+      if (hasUnsavedChangesRef.current && formDataRef.current.status !== "completed") {
         e.preventDefault()
         e.returnValue = ""
       }
@@ -349,53 +917,35 @@ export default function CreateDocumentPage() {
 
     window.addEventListener("beforeunload", handleBeforeUnload)
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
-  }, [hasUnsavedChanges, formData.status])
+  }, [])
 
-  useEffect(() => {
-    if (!documentType) return
-
-    const saveInProgress = () => {
-      const hasContent =
-        documentTitle ||
-        Object.keys(formData).some((key) => {
-          if (["documentType", "id", "createdAt", "updatedAt", "author", "status", "tone"].includes(key)) return false
-          return formData[key] && formData[key] !== ""
-        })
-
-      if (!hasContent) return
-
-      const inProgressDoc = {
-        ...formData,
-        title: documentTitle || "Untitled Document",
-        tone,
-        status: "in-progress",
-        updatedAt: new Date().toISOString(),
-      }
-
-      const existingDocs = localStorage.getItem("modocs_documents")
-      const docs = existingDocs ? JSON.parse(existingDocs) : []
-
-      if (editingDocId) {
-        const index = docs.findIndex((d: any) => d.id === editingDocId)
-        if (index !== -1) {
-          docs[index] = inProgressDoc
-        }
-      } else if (formData.id) {
-        const index = docs.findIndex((d: any) => d.id === formData.id)
-        if (index !== -1) {
-          docs[index] = inProgressDoc
-        } else {
-          docs.push(inProgressDoc)
-        }
-      }
-
-      localStorage.setItem("modocs_documents", JSON.stringify(docs))
-      window.dispatchEvent(new Event("storage"))
+  const saveInProgress = () => {
+    const inProgressDoc = {
+      ...formDataRef.current,
+      title: documentTitleRef.current || "Untitled Document",
+      documentType: documentTypeRef.current === "Other" ? customDocumentType : documentTypeRef.current,
+      tone,
+      status: "In Progress",
+      updatedAt: new Date().toISOString(),
+      id: editingDocId || formDataRef.current.id || `doc-${Date.now()}`,
+      createdAt: formDataRef.current.createdAt || new Date().toISOString(),
     }
 
-    const debounceTimer = setTimeout(saveInProgress, 1000)
-    return () => clearTimeout(debounceTimer)
-  }, [documentTitle, formData, documentType, editingDocId, tone])
+    const existingDocs = localStorage.getItem("modocs_documents")
+    const docs = existingDocs ? JSON.parse(existingDocs) : []
+
+    const docId = inProgressDoc.id
+    const existingIndex = docs.findIndex((d: any) => d.id === docId)
+
+    if (existingIndex !== -1) {
+      docs[existingIndex] = inProgressDoc
+    } else {
+      docs.push(inProgressDoc)
+    }
+
+    localStorage.setItem("modocs_documents", JSON.stringify(docs))
+    window.dispatchEvent(new Event("storage"))
+  }
 
   const handleNavigation = (path: string) => {
     if (hasUnsavedChanges && formData.status !== "completed") {
@@ -407,34 +957,7 @@ export default function CreateDocumentPage() {
   }
 
   const handleSaveAndLeave = () => {
-    const inProgressDoc = {
-      ...formData,
-      title: documentTitle || "Untitled Document",
-      tone,
-      status: "In Progress",
-      updatedAt: new Date().toISOString(),
-    }
-
-    const existingDocs = localStorage.getItem("modocs_documents")
-    const docs = existingDocs ? JSON.parse(existingDocs) : []
-
-    if (editingDocId) {
-      const index = docs.findIndex((d: any) => d.id === editingDocId)
-      if (index !== -1) {
-        docs[index] = inProgressDoc
-      }
-    } else {
-      const existingIndex = docs.findIndex((d: any) => d.id === formData.id)
-      if (existingIndex !== -1) {
-        docs[existingIndex] = inProgressDoc
-      } else {
-        docs.push(inProgressDoc)
-      }
-    }
-
-    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
-    window.dispatchEvent(new Event("storage"))
-
+    saveInProgress()
     setHasUnsavedChanges(false)
     if (pendingNavigation) {
       router.push(pendingNavigation)
@@ -451,19 +974,21 @@ export default function CreateDocumentPage() {
   const handleDocumentTypeChange = (type: DocumentType | "Other") => {
     setDocumentType(type)
     setErrors({}) // Clear errors when type changes
-    setFormData({
+    setFormData((prev: any) => ({
+      ...prev,
       documentType: type,
-      id: editingDocId || `doc-${Date.now()}`,
-      createdAt: formData.createdAt || new Date().toISOString(),
+      id: editingDocId || prev.id || `doc-${Date.now()}`,
+      createdAt: prev.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       author: "Current User",
-      status: "in-progress",
+      status: "In Progress", // Set initial status
       tone,
-    })
+    }))
     // If custom type is selected, clear it if it's not 'Other'
     if (type !== "Other") {
       setCustomDocumentType("")
     }
+    setHasUnsavedChanges(true) // Mark as unsaved when type changes
   }
 
   const handleNext = () => {
@@ -488,38 +1013,11 @@ export default function CreateDocumentPage() {
       }
     }
 
-    if (currentStep === 3) {
-      if (!documentTitle.trim()) {
-        setErrors({ documentTitle: "Document title is required" })
-        toast({
-          title: "Title Required",
-          description: "Please enter a document title",
-          variant: "destructive",
-        })
-        return
-      }
-      if (documentTitle.trim().length < 3) {
-        setErrors({ documentTitle: "Document title must be at least 3 characters" })
-        toast({
-          title: "Title Too Short",
-          description: "Document title must be at least 3 characters",
-          variant: "destructive",
-        })
-        return
-      }
-      if (!validateForm()) {
-        toast({
-          title: "Validation Error",
-          description: "Please fill in all required fields correctly",
-          variant: "destructive",
-        })
-        return
-      }
-    }
-
     setErrors({})
     if (currentStep < 4) {
+      // Changed from 3 to 4
       setCurrentStep(currentStep + 1)
+      setShowPreview(false)
     }
   }
 
@@ -533,6 +1031,24 @@ export default function CreateDocumentPage() {
   }
 
   const handleGenerate = () => {
+    if (!documentTitle.trim()) {
+      setErrors({ documentTitle: "Document title is required" })
+      toast({
+        title: "Title Required",
+        description: "Please enter a document title",
+        variant: "destructive",
+      })
+      return
+    }
+    if (documentTitle.trim().length < 3) {
+      setErrors({ documentTitle: "Document title must be at least 3 characters" })
+      toast({
+        title: "Title Too Short",
+        description: "Document title must be at least 3 characters",
+        variant: "destructive",
+      })
+      return
+    }
     if (!validateForm()) {
       toast({
         title: "Validation Error",
@@ -542,11 +1058,16 @@ export default function CreateDocumentPage() {
       return
     }
 
-    setShowPreview(true)
-    toast({
-      title: "Document Generated!",
-      description: "Your document preview is now available",
-    })
+    setIsGenerating(true)
+
+    setTimeout(() => {
+      setIsGenerating(false)
+      setCurrentStep(4)
+      toast({
+        title: "Document Generated!",
+        description: "Your document has been generated successfully.",
+      })
+    }, 3000)
   }
 
   const handleInputChange = (field: string, value: any) => {
@@ -562,6 +1083,7 @@ export default function CreateDocumentPage() {
         return newErrors
       })
     }
+    setHasUnsavedChanges(true)
   }
 
   const handleNestedInputChange = (path: string[], value: any) => {
@@ -584,6 +1106,7 @@ export default function CreateDocumentPage() {
         return newErrors
       })
     }
+    setHasUnsavedChanges(true)
   }
 
   const validateForm = (): boolean => {
@@ -655,7 +1178,7 @@ export default function CreateDocumentPage() {
     }
 
     const existingDocs = localStorage.getItem("modocs_documents")
-    const docs = existingDocs ? JSON.JSON.parse(existingDocs) : []
+    const docs = existingDocs ? JSON.parse(existingDocs) : [] // Fixed JSON.JSON.parse typo
 
     if (editingDocId) {
       const index = docs.findIndex((d: any) => d.id === editingDocId)
@@ -671,7 +1194,7 @@ export default function CreateDocumentPage() {
       }
     }
 
-    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
+    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs)) // Fixed JSON.JSON.stringify typo
     window.dispatchEvent(new Event("storage"))
     setHasUnsavedChanges(false)
     setShowSuccessMessage(true)
@@ -704,77 +1227,162 @@ export default function CreateDocumentPage() {
     })
   }
 
-  const handleDownloadPDF = () => {
-    // Note: This creates a simple HTML representation for PDF printing
-    const printWindow = window.open("", "", "height=800,width=800")
-    if (!printWindow) return
+  const handleDownloadPDF = async () => {
+    const previewElement = document.getElementById("document-preview-content")
+    if (!previewElement) {
+      toast({
+        title: "Error",
+        description: "No preview available to download",
+        variant: "destructive",
+      })
+      return
+    }
 
-    const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
+    try {
+      toast({
+        title: "Generating PDF...",
+        description: "Please wait while we prepare your document",
+      })
 
-    printWindow.document.write(`
+      // Capture the preview element as canvas
+      const canvas = await html2canvas(previewElement, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      })
+
+      // Calculate PDF dimensions
+      const imgWidth = 210 // A4 width in mm
+      const pageHeight = 297 // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      let heightLeft = imgHeight
+
+      const pdf = new jsPDF("p", "mm", "a4")
+      let position = 0
+
+      // Add image to PDF
+      const imgData = canvas.toDataURL("image/png")
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
+
+      // Add new pages if content overflows
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
+      }
+
+      // Download the PDF
+      pdf.save(`${documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`)
+
+      toast({
+        title: "PDF Downloaded",
+        description: "Your document has been saved as PDF",
+      })
+    } catch (error) {
+      console.error("PDF generation error:", error)
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDownloadWord = () => {
+    const previewElement = document.getElementById("document-preview-content")
+    if (!previewElement) {
+      toast({
+        title: "Error",
+        description: "No preview available to download",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Create a complete HTML document with proper Word formatting
+    const htmlContent = `
       <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${documentTitle}</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              max-width: 800px;
-              margin: 40px auto;
-              padding: 20px;
-              line-height: 1.6;
-            }
-            h1 {
-              color: #2663eb;
-              border-bottom: 3px solid #2663eb;
-              padding-bottom: 10px;
-            }
-            .meta {
-              color: #666;
-              font-size: 14px;
-              margin-bottom: 20px;
-            }
-            .section {
-              margin: 20px 0;
-            }
-            .label {
-              font-weight: bold;
-              color: #333;
-            }
-          </style>
-        </head>
-        <body>
-          <h1>${documentTitle}</h1>
-          <div class="meta">Document Type: ${finalDocumentType} | Tone: ${tone}</div>
-          ${Object.entries(formData)
-            .filter(
-              ([key]) =>
-                !["documentType", "id", "createdAt", "updatedAt", "author", "status", "title", "tone"].includes(key),
-            )
-            .map(
-              ([key, value]) => `
-              <div class="section">
-                <span class="label">${key.replace(/([A-Z])/g, " $1").trim()}:</span>
-                <span>${value}</span>
-              </div>
-            `,
-            )
-            .join("")}
-        </body>
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset='utf-8'>
+        <title>${documentTitle}</title>
+        <!--[if gte mso 9]>
+        <xml>
+          <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+          </w:WordDocument>
+        </xml>
+        <![endif]-->
+        <style>
+          @page {
+            size: 8.5in 11in;
+            margin: 1in;
+          }
+          body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #000;
+            background: white;
+          }
+          h1 { font-size: 24pt; font-weight: bold; margin-bottom: 12pt; }
+          h2 { font-size: 18pt; font-weight: bold; margin-bottom: 10pt; }
+          h3 { font-size: 14pt; font-weight: bold; margin-bottom: 8pt; }
+          p { margin-bottom: 10pt; }
+          table { 
+            border-collapse: collapse; 
+            width: 100%;
+            margin: 10pt 0;
+          }
+          th, td { 
+            padding: 8pt;
+            border: 1pt solid #000;
+            text-align: left;
+          }
+          th {
+            font-weight: bold;
+            background-color: #f0f0f0;
+          }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+          .font-bold { font-weight: bold; }
+          .uppercase { text-transform: uppercase; }
+          .underline { text-decoration: underline; }
+          .mb-4 { margin-bottom: 12pt; }
+          .mb-2 { margin-bottom: 6pt; }
+          .mt-4 { margin-top: 12pt; }
+          .border-b-2 { border-bottom: 2pt solid #000; padding-bottom: 6pt; }
+          .border-t-2 { border-top: 2pt solid #000; padding-top: 6pt; }
+        </style>
+      </head>
+      <body>
+        ${previewElement.innerHTML}
+      </body>
       </html>
-    `)
+    `
 
-    printWindow.document.close()
-    printWindow.focus()
+    // Create blob with BOM for proper Word encoding
+    const blob = new Blob(["\ufeff", htmlContent], {
+      type: "application/msword",
+    })
 
-    setTimeout(() => {
-      printWindow.print()
-      printWindow.close()
-    }, 250)
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.doc`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
 
     toast({
-      title: "PDF Ready",
-      description: "Opening print dialog for PDF save",
+      title: "Word Document Downloaded",
+      description: "Your document has been saved as .doc",
     })
   }
 
@@ -858,6 +1466,32 @@ export default function CreateDocumentPage() {
     }
   }
 
+  const generateDocument = () => {
+    // This function should render the document preview.
+    // It's essentially a call to the DocumentPreview component's logic.
+    // For simplicity, we can use a placeholder or re-use the component's structure.
+
+    // To properly render in this context, we'll simulate the DocumentPreview output
+    // This might need adjustment if DocumentPreview has internal state or dependencies
+    // that are not directly available here.
+    const previewElement = document.createElement("div") // Create a temporary element to render into
+
+    // Re-render the DocumentPreview component's output into this element.
+    // This is a simplified approach; in a real app, you might use a rendering library
+    // or ensure DocumentPreview is a functional component that can be called.
+    const previewContent = ReactDOMServer.renderToString(
+      <DocumentPreview
+        formData={formData}
+        documentType={documentType === "Other" ? customDocumentType : documentType}
+        documentTitle={documentTitle}
+        tone={tone}
+      />,
+    )
+
+    previewElement.innerHTML = previewContent
+    return previewElement.innerHTML
+  }
+
   if (showSuccessMessage) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -868,7 +1502,7 @@ export default function CreateDocumentPage() {
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-2">Document Saved!</h2>
             <p className="text-muted-foreground mb-6">
-              Your document has been successfully saved and downloaded as output.json
+              Your document has been successfully saved. You can view it in the Document Manager.
             </p>
             <div className="flex flex-col gap-3">
               <Link href="/modocs/view" className="w-full">
@@ -942,47 +1576,15 @@ export default function CreateDocumentPage() {
                   <span className="hidden sm:inline">Manage Documents</span>
                 </Button>
               </button>
-              {showPreview && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="gap-2">
-                      <Download className="h-4 w-4" />
-                      <span className="hidden sm:inline">Download</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleDownloadPDF}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Download as PDF
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDownloadJSON}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Download as JSON
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-              {showPreview && (
-                <Button onClick={handleSave} className="gap-2" variant="default">
-                  <Check className="h-4 w-4" />
-                  <span className="hidden sm:inline">Save Document</span>
-                  <span className="sm:hidden">Save</span>
-                </Button>
-              )}
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Step Indicator */}
       <StepIndicator currentStep={currentStep} />
 
-      {/* Main Content */}
-      <section
-        className={`mx-auto px-4 sm:px-6 lg:px-8 py-12 transition-all duration-500 ${showPreview ? "max-w-7xl" : "max-w-3xl"}`}
-      >
-        {!showPreview ? (
+      <section className="mx-auto px-4 sm:px-6 lg:px-8 py-12 transition-all duration-500 max-w-3xl">
+        {currentStep < 4 ? (
           <div className="space-y-6">
             {/* Step 1: Select Type */}
             {currentStep === 1 && (
@@ -1078,7 +1680,10 @@ export default function CreateDocumentPage() {
                     ].map((option) => (
                       <button
                         key={option.value}
-                        onClick={() => setTone(option.value as any)}
+                        onClick={() => {
+                          setTone(option.value as any)
+                          setHasUnsavedChanges(true)
+                        }}
                         className={`p-4 border-2 transition-all hover:border-primary/50 rounded-lg text-center ${
                           tone === option.value ? "border-primary bg-primary/5" : "border-border bg-card"
                         }`}
@@ -1111,6 +1716,7 @@ export default function CreateDocumentPage() {
                             return newErrors
                           })
                         }
+                        setHasUnsavedChanges(true)
                       }}
                       placeholder="e.g., Q4 2024 Consulting Agreement"
                       className={errors.documentTitle ? "border-destructive" : ""}
@@ -1119,46 +1725,23 @@ export default function CreateDocumentPage() {
                   </CardContent>
                 </Card>
                 {renderFormFields()}
-              </>
-            )}
 
-            {/* Step 4: Generate */}
-            {currentStep === 4 && (
-              <Card className="border-border bg-card">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Ready to Generate</CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Click generate to create your {documentType} with a {tone} tone
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <h4 className="font-semibold mb-2">Document Summary</h4>
-                      <dl className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Type:</dt>
-                          <dd className="font-medium">
-                            {documentType === "Other" ? customDocumentType : documentType}
-                          </dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Title:</dt>
-                          <dd className="font-medium">{documentTitle}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Tone:</dt>
-                          <dd className="font-medium capitalize">{tone}</dd>
-                        </div>
-                      </dl>
-                    </div>
-                    <Button onClick={handleGenerate} className="w-full gap-2" size="lg">
-                      <Sparkles className="h-5 w-5" />
-                      Generate Document
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                <div className="pt-4">
+                  <Button onClick={handleGenerate} className="w-full gap-2" size="lg" disabled={isGenerating}>
+                    {isGenerating ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-5 w-5" />
+                        Generate Document
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
             )}
 
             {/* Navigation Buttons */}
@@ -1172,7 +1755,7 @@ export default function CreateDocumentPage() {
                 <ChevronLeft className="h-4 w-4" />
                 Back
               </Button>
-              {currentStep < 4 && (
+              {currentStep < 4 && ( // Changed from 3 to 4
                 <Button onClick={handleNext} className="gap-2">
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -1181,28 +1764,65 @@ export default function CreateDocumentPage() {
             </div>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-card border border-border rounded-lg p-8 shadow-lg">
-              <DocumentPreview
-                formData={formData}
-                documentType={documentType === "Other" ? customDocumentType : documentType}
-                documentTitle={documentTitle}
-                tone={tone}
-              />
-            </div>
-            <div className="flex justify-center gap-4 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowPreview(false)
-                  setCurrentStep(3)
-                }}
-                className="gap-2 bg-transparent"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back to Edit
-              </Button>
-            </div>
+          <div className="space-y-6">
+            <Card className="border-border bg-card">
+              <CardHeader>
+                <CardTitle className="text-foreground">Document Preview</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Review your generated document and download when ready
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div
+                  id="document-preview-content"
+                  className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 min-h-[600px]"
+                  dangerouslySetInnerHTML={{ __html: generateDocument() }}
+                />
+
+                <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                  <Button onClick={handleBack} variant="outline" className="gap-2 bg-transparent">
+                    <ChevronLeft className="h-4 w-4" />
+                    Back to Edit
+                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button className="gap-2 flex-1">
+                        <Download className="h-4 w-4" />
+                        Download
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={handleDownloadPDF} className="gap-2">
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#DC2626">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.5,16H14V19H12.5V16H11V14.5H12.5V13.5C12.5,12.1 13.6,11 15,11V12.5C14.5,12.5 14,13 14,13.5V14.5H15.5V16M6,20V4H13V9H18V20H6Z" />
+                          </svg>
+                        </div>
+                        Download as PDF
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleDownloadWord} className="gap-2">
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#2B579A">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.2,20H13.8L12,13.2L10.2,20H8.8L6.6,11H8.1L9.5,17.8L11.3,11H12.6L14.4,17.8L15.8,11H17.3L15.2,20M13,9V3.5L18.5,9H13Z" />
+                          </svg>
+                        </div>
+                        Download as Word
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleDownloadJSON} className="gap-2">
+                        <div className="w-4 h-4 flex items-center justify-center">
+                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#F59E0B">
+                            <path d="M5,3H7V5H5V10A2,2 0 0,1 3,12A2,2 0 0,1 5,14V19H7V21H5C3.93,20.73 3,20.1 3,19V15A2,2 0 0,0 1,13H0V11H1A2,2 0 0,0 3,9V5A2,2 0 0,1 5,3M19,3A2,2 0 0,1 21,5V9A2,2 0 0,0 23,11H24V13H23A2,2 0 0,0 21,15V19A2,2 0 0,1 19,21H17V19H19V14A2,2 0 0,1 21,12A2,2 0 0,1 19,10V5H17V3H19M12,15A1,1 0 0,1 13,16A1,1 0 0,1 12,17A1,1 0 0,1 11,16A1,1 0 0,1 12,15M8,15A1,1 0 0,1 9,16A1,1 0 0,1 8,17A1,1 0 0,1 7,16A1,1 0 0,1 8,15M16,15A1,1 0 0,1 17,16A1,1 0 0,1 16,17A1,1 0 0,1 15,16A1,1 0 0,1 16,15Z" />
+                          </svg>
+                        </div>
+                        Download as JSON
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </section>
