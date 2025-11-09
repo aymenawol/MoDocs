@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: "MoDocs - Business Document Generator",
   description: "Create professional business documents",
   generator: "v0.app",
+  icons: {
+    icon: "/icon.svg",
+  },
 }
 
 export default function RootLayout({

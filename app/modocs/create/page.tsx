@@ -522,10 +522,12 @@ export default function CreatePage() {
               </div>
             </button>
             <div className="flex items-center gap-4">
-              <Button variant="outline" className="gap-2 bg-transparent" onClick={() => handleNavigation("/modocs/view")}>
-                <Eye className="h-4 w-4" />
-                <span className="hidden sm:inline">Manage Documents</span>
-              </Button>
+              <button onClick={() => handleNavigation("/modocs/view")}>
+                <Button variant="outline" className="gap-2 bg-transparent">
+                  <Eye className="h-4 w-4" />
+                  <span className="hidden sm:inline">Manage Documents</span>
+                </Button>
+              </button>
               <Button onClick={handleSave} className="gap-2" disabled={!documentType}>
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">Save Document</span>
