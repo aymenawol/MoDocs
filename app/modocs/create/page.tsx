@@ -33,8 +33,6 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { DocumentType } from "@/lib/document-types"
-import html2canvas from "html2canvas"
-import jsPDF from "jspdf"
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
   const steps = [
@@ -45,7 +43,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   ]
 
   return (
-    <div className="sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border py-4 mb-8">
+    <div className="sticky top-16 z-40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b border-border py-4 mb-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="relative">
           {/* Progress bar */}
@@ -875,20 +873,22 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
     }
   }
 
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6 pb-4 border-b">
-        <h3 className="text-xl font-bold">Document Preview</h3>
-        <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-300">
-          {tone.charAt(0).toUpperCase() + tone.slice(1)} Tone
-        </div>
-      </div>
-      <div className="flex-1 overflow-auto bg-gray-100 p-4" id="document-preview-content">
-        {generatePreviewContent()}
-      </div>
-    </div>
-  )
+  return <div className="space-y-6" data-testid="document-preview-body">{generatePreviewContent()}</div>
 }
+
+const BUILTIN_DOCUMENT_TYPES = new Set([
+  "Invoice",
+  "Purchase Order",
+  "Contract",
+  "Business Letter",
+  "Memo",
+  "Report",
+  "Financial Statement",
+  "Work Order",
+  "Proposal",
+  "Receipt",
+  "Other",
+])
 
 export default function CreateDocumentPage() {
   const { toast } = useToast()
@@ -901,7 +901,7 @@ export default function CreateDocumentPage() {
   const [tone, setTone] = useState<"professional" | "friendly" | "formal" | "casual">("professional")
   const [documentTitle, setDocumentTitle] = useState("")
   const [formData, setFormData] = useState<any>({})
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, any>>({})
   const [showPreview, setShowPreview] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
@@ -932,25 +932,53 @@ export default function CreateDocumentPage() {
   }, [hasUnsavedChanges])
 
   useEffect(() => {
+    if (typeof window === "undefined") return
+
     const editId = searchParams.get("edit")
-    if (editId) {
-      const stored = localStorage.getItem("modocs_documents")
-      if (stored) {
-        const docs = JSON.parse(stored)
-        const doc = docs.find((d: any) => d.id === editId)
-        if (doc) {
-          setDocumentType(doc.documentType)
-          if (doc.documentType === "Other") {
-            setCustomDocumentType(doc.customDocumentType || "")
-          }
-          setDocumentTitle(doc.title || "")
-          setTone(doc.tone || "professional")
-          setFormData(doc)
-          setEditingDocId(doc.id)
-          // Navigate to step 3 (Fill in Details)
-          setCurrentStep(3)
-        }
-      }
+    const previewId = searchParams.get("preview")
+
+    if (!editId && !previewId) return
+
+    const stored = localStorage.getItem("modocs_documents")
+    if (!stored) return
+
+    const docs = JSON.parse(stored)
+    const targetId = editId ?? previewId
+    const doc = docs.find((d: any) => d.id === targetId)
+
+    if (!doc) return
+
+    const resolvedFormData = {
+      ...(doc.formData || doc),
+      id: doc.id,
+      createdAt: doc.createdAt,
+      status: doc.status,
+    }
+
+    const isCustomType = !BUILTIN_DOCUMENT_TYPES.has(doc.documentType)
+    const effectiveType = isCustomType ? "Other" : (doc.documentType as DocumentType | "Other")
+
+    setDocumentType(effectiveType)
+
+    if (isCustomType) {
+      setCustomDocumentType(doc.customDocumentType || doc.documentType || "")
+    } else if (doc.documentType === "Other") {
+      setCustomDocumentType(doc.customDocumentType || "")
+    } else {
+      setCustomDocumentType("")
+    }
+  setDocumentTitle(doc.title || "")
+  setTone(doc.tone || "professional")
+  setFormData(resolvedFormData)
+  setEditingDocId(doc.id)
+
+    if (previewId) {
+      setCurrentStep(4)
+      setShowPreview(true)
+      setHasUnsavedChanges(false)
+    } else {
+      setCurrentStep(3)
+      setShowPreview(false)
     }
   }, [searchParams])
 
@@ -958,13 +986,26 @@ export default function CreateDocumentPage() {
     const docToEdit = sessionStorage.getItem("modocs_edit_document")
     if (docToEdit) {
       const doc = JSON.parse(docToEdit)
-      setDocumentType(doc.documentType)
-      if (doc.documentType === "Other") {
+      const isCustomType = !BUILTIN_DOCUMENT_TYPES.has(doc.documentType)
+      const effectiveType = isCustomType ? "Other" : (doc.documentType as DocumentType | "Other")
+
+      setDocumentType(effectiveType)
+
+      if (isCustomType) {
+        setCustomDocumentType(doc.customDocumentType || doc.documentType || "")
+      } else if (doc.documentType === "Other") {
         setCustomDocumentType(doc.customDocumentType || "")
+      } else {
+        setCustomDocumentType("")
       }
       setDocumentTitle(doc.title || "")
       setTone(doc.tone || "professional")
-      setFormData(doc)
+      setFormData({
+        ...(doc.formData || doc),
+        id: doc.id,
+        createdAt: doc.createdAt,
+        status: doc.status,
+      })
       setEditingDocId(doc.id)
       setCurrentStep(3)
       sessionStorage.removeItem("modocs_edit_document")
@@ -990,6 +1031,7 @@ export default function CreateDocumentPage() {
       ...formDataRef.current,
       title: documentTitleRef.current || "Untitled Document",
       documentType: documentTypeRef.current === "Other" ? customDocumentType : documentTypeRef.current,
+      ...(documentTypeRef.current === "Other" ? { customDocumentType } : {}),
       tone,
       status: "In Progress",
       updatedAt: new Date().toISOString(),
@@ -1152,14 +1194,19 @@ export default function CreateDocumentPage() {
     setShowPreview(true)
     setHasUnsavedChanges(true)
 
+    const timestamp = new Date().toISOString()
+    const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
+
     const savedDoc = {
       id: formData.id || Date.now().toString(),
-      documentType: documentType === "Other" ? customDocumentType : documentType,
+      documentType: finalDocumentType,
+      customDocumentType: documentType === "Other" ? customDocumentType : undefined,
       title: documentTitle,
       status: "Completed",
-      createdAt: new Date().toISOString(),
+      createdAt: formData.createdAt || timestamp,
+      updatedAt: timestamp,
       tone,
-      formData,
+      formData: documentType === "Other" ? { ...formData, customDocumentType } : formData,
     }
 
     const docs = JSON.parse(localStorage.getItem("modocs_documents") || "[]")
@@ -1170,6 +1217,7 @@ export default function CreateDocumentPage() {
       docs.push(savedDoc)
     }
     localStorage.setItem("modocs_documents", JSON.stringify(docs))
+    window.dispatchEvent(new Event("storage"))
 
     toast({
       title: "Document Generated!",
@@ -1288,6 +1336,7 @@ export default function CreateDocumentPage() {
 
     const documentData = {
       ...formData,
+      ...(documentType === "Other" ? { customDocumentType } : {}),
       documentType: finalDocumentType,
       title: documentTitle,
       tone,
@@ -1312,7 +1361,7 @@ export default function CreateDocumentPage() {
       }
     }
 
-    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs)) // Fixed JSON.JSON.stringify typo
+    localStorage.setItem("modocs_documents", JSON.stringify(docs))
     window.dispatchEvent(new Event("storage"))
     setHasUnsavedChanges(false)
     setShowSuccessMessage(true)
@@ -1320,8 +1369,10 @@ export default function CreateDocumentPage() {
 
   const handleDownloadJSON = () => {
     const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
+    const safeTitle = documentTitle?.trim() ? documentTitle : "document"
     const documentData = {
       ...formData,
+      ...(documentType === "Other" ? { customDocumentType } : {}),
       documentType: finalDocumentType,
       title: documentTitle,
       tone,
@@ -1333,7 +1384,7 @@ export default function CreateDocumentPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `${documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.json`
+    a.download = `${safeTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -1352,29 +1403,67 @@ export default function CreateDocumentPage() {
         throw new Error("Preview element not found")
       }
 
-      // html2canvas needs a specific config to work with styled components and custom fonts.
-      // We are using standard Tailwind CSS here which should work, but if issues arise,
-      // consider setting `window.scrollTo(0, 0)` and ensuring the element is visible.
-      const canvas = await html2canvas(element, {
-        scale: 2, // Increase scale for better resolution
-        backgroundColor: "#ffffff", // Ensure a white background
-        logging: false, // Disable logging for cleaner console
-        useCORS: true, // Allow images from other origins if any
-        allowTaint: true, // Allow taint if CORS is not an issue
+      const safeTitle = documentTitle?.trim() ? documentTitle : "document"
+
+      // Show loading toast
+      toast({
+        title: "Generating PDF",
+        description: "Please wait while we generate your document...",
       })
 
-      const imgData = canvas.toDataURL("image/png")
-      const pdf = new jsPDF("p", "mm", "a4")
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = pdf.internal.pageSize.getHeight()
-      const imgWidth = canvas.width
-      const imgHeight = canvas.height
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
-      const imgX = (pdfWidth - imgWidth * ratio) / 2 // Center horizontally
-      const imgY = 0 // Start from top
+      // Get the HTML content with all styles
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${documentTitle}</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+              * {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              }
+              body {
+                margin: 0;
+                padding: 40px;
+                background: white;
+              }
+            </style>
+          </head>
+          <body>
+            ${element.innerHTML}
+          </body>
+        </html>
+      `
 
-      pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio)
-      pdf.save(`${documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`)
+      // Send to API for PDF generation
+      const response = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          html: htmlContent,
+          fileName: documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase(),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("PDF generation failed")
+      }
+
+      // Download the PDF
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+  link.download = `${safeTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
 
       toast({
         title: "PDF Downloaded",
@@ -1388,101 +1477,6 @@ export default function CreateDocumentPage() {
         variant: "destructive",
       })
     }
-  }
-
-  const handleDownloadWord = () => {
-    const previewElement = document.getElementById("document-preview-content")
-    if (!previewElement) {
-      toast({
-        title: "Error",
-        description: "No preview available to download",
-        variant: "destructive",
-      })
-      return
-    }
-
-    // Create a complete HTML document with proper Word formatting
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns="http://www.w3.org/TR/REC-html40">
-      <head>
-        <meta charset='utf-8'>
-        <title>${documentTitle}</title>
-        <!--[if gte mso 9]>
-        <xml>
-          <w:WordDocument>
-            <w:View>Print</w:View>
-            <w:Zoom>100</w:Zoom>
-            <w:DoNotOptimizeForBrowser/>
-          </w:WordDocument>
-        </xml>
-        <![endif]-->
-        <style>
-          @page {
-            size: 8.5in 11in;
-            margin: 1in;
-          }
-          body {
-            font-family: 'Calibri', 'Arial', sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
-            color: #000;
-            background: white;
-          }
-          h1 { font-size: 24pt; font-weight: bold; margin-bottom: 12pt; }
-          h2 { font-size: 18pt; font-weight: bold; margin-bottom: 10pt; }
-          h3 { font-size: 14pt; font-weight: bold; margin-bottom: 8pt; }
-          p { margin-bottom: 10pt; }
-          table { 
-            border-collapse: collapse; 
-            width: 100%;
-            margin: 10pt 0;
-          }
-          th, td { 
-            padding: 8pt;
-            border: 1pt solid #000;
-            text-align: left;
-          }
-          th {
-            font-weight: bold;
-            background-color: #f0f0f0;
-          }
-          .text-center { text-align: center; }
-          .text-right { text-align: right; }
-          .font-bold { font-weight: bold; }
-          .uppercase { text-transform: uppercase; }
-          .underline { text-decoration: underline; }
-          .mb-4 { margin-bottom: 12pt; }
-          .mb-2 { margin-bottom: 6pt; }
-          .mt-4 { margin-top: 12pt; }
-          .border-b-2 { border-bottom: 2pt solid #000; padding-bottom: 6pt; }
-          .border-t-2 { border-top: 2pt solid #000; padding-top: 6pt; }
-        </style>
-      </head>
-      <body>
-        ${previewElement.innerHTML}
-      </body>
-      </html>
-    `
-
-    // Create blob with BOM for proper Word encoding
-    const blob = new Blob(["\ufeff", htmlContent], {
-      type: "application/msword",
-    })
-
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `${documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.doc`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    toast({
-      title: "Word Document Downloaded",
-      description: "Your document has been saved as .doc",
-    })
   }
 
   const renderFormFields = () => {
@@ -1646,12 +1640,10 @@ export default function CreateDocumentPage() {
               </div>
             </button>
             <div className="flex items-center gap-4">
-              <button onClick={() => handleNavigation("/modocs/view")}>
-                <Button variant="outline" className="gap-2 bg-transparent">
-                  <Eye className="h-4 w-4" />
-                  <span className="hidden sm:inline">Manage Documents</span>
-                </Button>
-              </button>
+              <Button variant="outline" className="gap-2 bg-transparent" onClick={() => handleNavigation("/modocs/view")}>
+                <Eye className="h-4 w-4" />
+                <span className="hidden sm:inline">Manage Documents</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -1844,70 +1836,62 @@ export default function CreateDocumentPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            <Card className="border-border bg-card">
-              <CardHeader>
-                <CardTitle className="text-foreground">Document Preview</CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  Review your generated document and download when ready
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div
-                  id="document-preview-content"
-                  className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 min-h-[600px]"
-                >
-                  <DocumentPreview
-                    formData={formData}
-                    documentType={documentType === "Other" ? customDocumentType : documentType}
-                    documentTitle={documentTitle}
-                    tone={tone}
-                  />
-                </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-semibold text-foreground">
+                  {documentTitle?.trim() ? documentTitle : "Untitled Document"}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {(documentType === "Other" ? customDocumentType : documentType) || "Preview"}
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Button onClick={handleBack} variant="outline" className="gap-2 bg-transparent sm:w-auto w-full">
+                  <ChevronLeft className="h-4 w-4" />
+                  Edit Details
+                </Button>
 
-                <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                  <Button onClick={handleBack} variant="outline" className="gap-2 bg-transparent">
-                    <ChevronLeft className="h-4 w-4" />
-                    Back to Edit
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className="gap-2 flex-1">
-                        <Download className="h-4 w-4" />
-                        Download
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem onClick={handleDownloadPDF} className="gap-2">
-                        <div className="w-4 h-4 flex items-center justify-center">
-                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#DC2626">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.5,16H14V19H12.5V16H11V14.5H12.5V13.5C12.5,12.1 13.6,11 15,11V12.5C14.5,12.5 14,13 14,13.5V14.5H15.5V16M6,20V4H13V9H18V20H6Z" />
-                          </svg>
-                        </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="gap-2 sm:w-auto w-full">
+                      <Download className="h-4 w-4" />
+                      Download
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleDownloadPDF} className="gap-2">
+                      <div className="w-4 h-4 flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#DC2626">
+                          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.5,16H14V19H12.5V16H11V14.5H12.5V13.5C12.5,12.1 13.6,11 15,11V12.5C14.5,12.5 14,13 14,13.5V14.5H15.5V16M6,20V4H13V9H18V20H6Z" />
+                        </svg>
+                      </div>
                         Download as PDF
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleDownloadWord} className="gap-2">
-                        <div className="w-4 h-4 flex items-center justify-center">
-                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#2B579A">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.2,20H13.8L12,13.2L10.2,20H8.8L6.6,11H8.1L9.5,17.8L11.3,11H12.6L14.4,17.8L15.8,11H17.3L15.2,20M13,9V3.5L18.5,9H13Z" />
-                          </svg>
-                        </div>
-                        Download as Word
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleDownloadJSON} className="gap-2">
-                        <div className="w-4 h-4 flex items-center justify-center">
-                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#F59E0B">
-                            <path d="M5,3H7V5H5V10A2,2 0 0,1 3,12A2,2 0 0,1 5,14V19H7V21H5C3.93,20.73 3,20.1 3,19V15A2,2 0 0,0 1,13H0V11H1A2,2 0 0,0 3,9V5A2,2 0 0,1 5,3M19,3A2,2 0 0,1 21,5V9A2,2 0 0,0 23,11H24V13H23A2,2 0 0,0 21,15V19A2,2 0 0,1 19,21H17V19H19V14A2,2 0 0,1 21,12A2,2 0 0,1 19,10V5H17V3H19M12,15A1,1 0 0,1 13,16A1,1 0 0,1 12,17A1,1 0 0,1 11,16A1,1 0 0,1 12,15M8,15A1,1 0 0,1 9,16A1,1 0 0,1 8,17A1,1 0 0,1 7,16A1,1 0 0,1 8,15M16,15A1,1 0 0,1 17,16A1,1 0 0,1 16,17A1,1 0 0,1 15,16A1,1 0 0,1 16,15Z" />
-                          </svg>
-                        </div>
-                        Download as JSON
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardContent>
-            </Card>
+                    <DropdownMenuItem onClick={handleDownloadJSON} className="gap-2">
+                      <div className="w-4 h-4 flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#F59E0B">
+                          <path d="M5,3H7V5H5V10A2,2 0 0,1 3,12A2,2 0 0,1 5,14V19H7V21H5C3.93,20.73 3,20.1 3,19V15A2,2 0 0,0 1,13H0V11H1A2,2 0 0,0 3,9V5A2,2 0 0,1 5,3M19,3A2,2 0 0,1 21,5V9A2,2 0 0,0 23,11H24V13H23A2,2 0 0,0 21,15V19A2,2 0 0,1 19,21H17V19H19V14A2,2 0 0,1 21,12A2,2 0 0,1 19,10V5H17V3H19M12,15A1,1 0 0,1 13,16A1,1 0 0,1 12,17A1,1 0 0,1 11,16A1,1 0 0,1 12,15M8,15A1,1 0 0,1 9,16A1,1 0 0,1 8,17A1,1 0 0,1 7,16A1,1 0 0,1 8,15M16,15A1,1 0 0,1 17,16A1,1 0 0,1 16,17A1,1 0 0,1 15,16A1,1 0 0,1 16,15Z" />
+                        </svg>
+                      </div>
+                      Download as JSON
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            <div
+              id="document-preview-content"
+              className="bg-white dark:bg-white text-black rounded-lg min-h-[600px] p-6 sm:p-10 border-0"
+            >
+              <DocumentPreview
+                formData={documentType === "Other" ? { ...formData, customDocumentType } : formData}
+                documentType={documentType}
+                documentTitle={documentTitle}
+                tone={tone}
+              />
+            </div>
           </div>
         )}
       </section>

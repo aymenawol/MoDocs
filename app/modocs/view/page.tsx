@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { FileText, ArrowLeft, Search, Grid3x3, List, Edit, Trash2, PlusCircle } from "lucide-react"
+import { FileText, ArrowLeft, Search, Grid3x3, List, Edit, Trash2, PlusCircle, Eye } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function ViewPage() {
@@ -45,15 +45,17 @@ export default function ViewPage() {
     return () => window.removeEventListener("storage", loadDocuments)
   }, [])
 
+  const getDocTimestamp = (doc: any) => new Date(doc.updatedAt || doc.createdAt || 0).getTime()
+
   const filteredDocuments = documents
     .filter((doc) => {
       const matchesSearch =
-        (doc.title || doc.documentType).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.author.toLowerCase().includes(searchQuery.toLowerCase())
+  (doc.title || doc.documentType).toLowerCase().includes(searchQuery.toLowerCase()) ||
+  (doc.author || "").toLowerCase().includes(searchQuery.toLowerCase())
       const matchesType = filterType === "all" || doc.documentType === filterType
       return matchesSearch && matchesType
     })
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .sort((a, b) => getDocTimestamp(b) - getDocTimestamp(a))
 
   const handleDelete = (id: string) => {
     setDocumentToDelete(id)
@@ -80,6 +82,10 @@ export default function ViewPage() {
     // Store document to edit in sessionStorage
     sessionStorage.setItem("modocs_edit_document", JSON.stringify(doc))
     router.push("/modocs/create")
+  }
+
+  const handleView = (doc: any) => {
+    router.push(`/modocs/create?preview=${doc.id}`)
   }
 
   // Helper to get display title
@@ -201,7 +207,7 @@ export default function ViewPage() {
                       <CardDescription className="text-muted-foreground mt-1">{doc.documentType}</CardDescription>
                     </div>
                     <div
-                      className="h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0"
+                      className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
                       style={{ backgroundColor: "rgba(38, 99, 235, 0.1)" }}
                     >
                       <FileText className="h-5 w-5" style={{ color: "#2663eb" }} />
@@ -212,7 +218,7 @@ export default function ViewPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Author:</span>
-                      <span className="font-medium text-foreground">{doc.author}</span>
+                      <span className="font-medium text-foreground">{doc.author || "Unknown"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Created:</span>
@@ -242,6 +248,10 @@ export default function ViewPage() {
                     )}
                   </div>
                   <div className="flex gap-2 mt-4">
+                    <Button size="sm" className="flex-1 gap-2" onClick={() => handleView(doc)}>
+                      <Eye className="h-3 w-3" />
+                      View
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -295,7 +305,7 @@ export default function ViewPage() {
                         </span>
                       </TableCell>
                       <TableCell className="font-medium">{doc.title || doc.documentType}</TableCell>
-                      <TableCell>{doc.author}</TableCell>
+                      <TableCell>{doc.author || "Unknown"}</TableCell>
                       <TableCell>{new Date(doc.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <span
@@ -318,6 +328,9 @@ export default function ViewPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => handleView(doc)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleEdit(doc)}>
                             <Edit className="h-4 w-4" />
                           </Button>

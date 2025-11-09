@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, PlusCircle, Menu, X } from "lucide-react"
@@ -14,6 +15,7 @@ const getStoredDocuments = () => {
 }
 
 export default function LandingPage() {
+  const router = useRouter()
   const [documents, setDocuments] = useState<any[]>([])
   const [mounted, setMounted] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -39,9 +41,15 @@ export default function LandingPage() {
   }).length
   const hoursSaved = ((totalDocuments * 45) / 60).toFixed(1)
 
-  const recentActivity = documents
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+  const getDocTimestamp = (doc: any) => new Date(doc.updatedAt || doc.createdAt || 0).getTime()
+
+  const recentActivity = [...documents]
+    .sort((a, b) => getDocTimestamp(b) - getDocTimestamp(a))
     .slice(0, 4)
+
+  const handleRecentPreview = (docId: string) => {
+    router.push(`/modocs/create?preview=${docId}`)
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,17 +87,17 @@ export default function LandingPage() {
           {mobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-border">
               <div className="flex flex-col gap-3">
-                <Link href="/modocs/view" className="w-full">
-                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+                  <Link href="/modocs/view">
                     Manage Documents
-                  </Button>
-                </Link>
-                <Link href="/modocs/create" className="w-full">
-                  <Button className="w-full justify-start gap-2">
+                  </Link>
+                </Button>
+                <Button className="w-full justify-start gap-2" asChild>
+                  <Link href="/modocs/create">
                     <PlusCircle className="h-4 w-4" />
                     Create Document
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </div>
           )}
@@ -164,38 +172,51 @@ export default function LandingPage() {
           <CardContent>
             {recentActivity.length > 0 ? (
               <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <Link
-                    key={activity.id}
-                    href={`/modocs/create?edit=${activity.id}`}
-                    className={`flex items-center justify-between p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-all duration-500 cursor-pointer block ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
-                    style={{ transitionDelay: `${800 + index * 100}ms` }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-primary" />
+                {recentActivity.map((activity, index) => {
+                  const rawStatus = (activity.status || "in-progress").toLowerCase()
+                  const isInProgress = rawStatus === "in-progress" || rawStatus === "in progress"
+
+                  return (
+                    <div
+                      key={activity.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleRecentPreview(activity.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault()
+                          handleRecentPreview(activity.id)
+                        }
+                      }}
+                      className={`flex items-center justify-between gap-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-all duration-500 cursor-pointer outline-none ring-primary/40 focus-visible:ring-2 ${mounted ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
+                      style={{ transitionDelay: `${800 + index * 100}ms` }}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-foreground">{activity.title || activity.documentType}</h4>
+                          <p className="text-sm text-muted-foreground">{activity.documentType}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground">{activity.title || activity.documentType}</h4>
-                        <p className="text-sm text-muted-foreground">{activity.documentType}</p>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(activity.updatedAt || activity.createdAt).toLocaleDateString()}
+                        </p>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            isInProgress
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                              : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                          }`}
+                        >
+                          {isInProgress ? "In Progress" : "Completed"}
+                        </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(activity.updatedAt).toLocaleDateString()}
-                      </p>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          activity.status === "in-progress"
-                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-                            : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        }`}
-                      >
-                        {activity.status === "in-progress" ? "In Progress" : "Completed"}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="text-center py-8">

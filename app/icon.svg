@@ -1,5 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="12" fill="#2663EB"/>
-  <path d="M20 18h24v4H20v-4zm0 8h24v4H20v-4zm0 8h16v4H20v-4z" fill="white" opacity="0.9"/>
-  <path d="M38 42l8-8-8-8v16z" fill="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MoDocs Logo">
+  <defs>
+    <linearGradient id="modocs-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5d8af4" />
+      <stop offset="100%" stop-color="#2663eb" />
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="52" height="52" rx="12" fill="url(#modocs-gradient)" />
+  <path
+    d="M36 12H24c-2.21 0-4 1.79-4 4v32c0 2.21 1.79 4 4 4h16c2.21 0 4-1.79 4-4V22l-8-10z"
+    fill="#ffffff"
+    opacity="0.98"
+  />
+  <path
+    d="M44 22h-6c-1.1 0-2-.9-2-2v-6"
+    fill="none"
+    stroke="#2663eb"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <line x1="38" y1="34" x2="26" y2="34" stroke="#2663eb" stroke-width="3" stroke-linecap="round" />
+  <line x1="38" y1="42" x2="26" y2="42" stroke="#2663eb" stroke-width="3" stroke-linecap="round" />
+  <line x1="30" y1="26" x2="26" y2="26" stroke="#2663eb" stroke-width="3" stroke-linecap="round" />
 </svg>
