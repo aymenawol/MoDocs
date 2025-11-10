@@ -1829,7 +1829,7 @@ export default function CreateDocumentPage() {
       documentType: documentTypeRef.current === "Other" ? customDocumentType : documentTypeRef.current,
       ...(documentTypeRef.current === "Other" ? { customDocumentType } : {}),
       tone,
-      status: "In Progress",
+      status: currentStep === 4 ? "Completed" : "In Progress", // Completed only if at preview stage
       updatedAt: new Date().toISOString(),
       id: editingDocId || formDataRef.current.id || `doc-${Date.now()}`,
       createdAt: formDataRef.current.createdAt || new Date().toISOString(),
@@ -1852,7 +1852,7 @@ export default function CreateDocumentPage() {
   }
 
   const handleNavigation = (path: string) => {
-    if (hasUnsavedChanges && formData.status !== "completed") {
+    if (hasUnsavedChanges && currentStep !== 4) {
       setPendingNavigation(path)
       setShowUnsavedDialog(true)
     } else {
@@ -1988,7 +1988,7 @@ export default function CreateDocumentPage() {
     setIsGenerating(false)
     setCurrentStep(4)
     setShowPreview(true)
-    setHasUnsavedChanges(true)
+    setHasUnsavedChanges(false)
 
     const timestamp = new Date().toISOString()
     const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
