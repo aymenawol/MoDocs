@@ -1525,6 +1525,143 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
         </div>
       )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
     } else {
       // Generic document for other types including custom "Other" types
       return (
@@ -1706,26 +1843,12 @@ export default function CreateDocumentPage() {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
-  const formDataRef = useRef(formData)
-  const documentTitleRef = useRef(documentTitle)
-  const documentTypeRef = useRef(documentType)
-  const hasUnsavedChangesRef = useRef(hasUnsavedChanges)
+  const formDataRef = useRef<any>({})
+  const documentTitleRef = useRef<string>("")
+  const documentTypeRef = useRef<DocumentType | "Other" | "">("")
+  const hasUnsavedChangesRef = useRef<boolean>(false)
 
-  useEffect(() => {
-    formDataRef.current = formData
-  }, [formData])
-
-  useEffect(() => {
-    documentTitleRef.current = documentTitle
-  }, [documentTitle])
-
-  useEffect(() => {
-    documentTypeRef.current = documentType
-  }, [documentType])
-
-  useEffect(() => {
-    hasUnsavedChangesRef.current = hasUnsavedChanges
-  }, [hasUnsavedChanges])
+  // Instead, update refs manually in event handlers and state setters
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -1755,6 +1878,7 @@ export default function CreateDocumentPage() {
     const effectiveType = isCustomType ? "Other" : (doc.documentType as DocumentType | "Other")
 
     setDocumentType(effectiveType)
+    documentTypeRef.current = effectiveType // Update ref
 
     if (isCustomType) {
       setCustomDocumentType(doc.customDocumentType || doc.documentType || "")
@@ -1764,14 +1888,17 @@ export default function CreateDocumentPage() {
       setCustomDocumentType("")
     }
     setDocumentTitle(doc.title || "")
+    documentTitleRef.current = doc.title || "" // Update ref
     setTone(doc.tone || "professional")
     setFormData(resolvedFormData)
+    formDataRef.current = resolvedFormData // Update ref
     setEditingDocId(doc.id)
 
     if (previewId) {
       setCurrentStep(4)
       setShowPreview(true)
       setHasUnsavedChanges(false)
+      hasUnsavedChangesRef.current = false // Update ref
     } else {
       setCurrentStep(3)
       setShowPreview(false)
@@ -1863,6 +1990,7 @@ export default function CreateDocumentPage() {
   const handleSaveAndLeave = () => {
     saveInProgress()
     setHasUnsavedChanges(false)
+    hasUnsavedChangesRef.current = false // Update ref
     if (pendingNavigation) {
       router.push(pendingNavigation)
     }
@@ -1870,6 +1998,7 @@ export default function CreateDocumentPage() {
 
   const handleDiscardAndLeave = () => {
     setHasUnsavedChanges(false)
+    hasUnsavedChangesRef.current = false // Update ref
     if (pendingNavigation) {
       router.push(pendingNavigation)
     }
@@ -1877,22 +2006,26 @@ export default function CreateDocumentPage() {
 
   const handleDocumentTypeChange = (type: DocumentType | "Other") => {
     setDocumentType(type)
+    documentTypeRef.current = type // Update ref
     setErrors({}) // Clear errors when type changes
-    setFormData((prev: any) => ({
-      ...prev,
+    const updatedData = {
+      ...formDataRef.current, // Use ref instead of state
       documentType: type,
-      id: editingDocId || prev.id || `doc-${Date.now()}`,
-      createdAt: prev.createdAt || new Date().toISOString(),
+      id: editingDocId || formDataRef.current.id || `doc-${Date.now()}`,
+      createdAt: formDataRef.current.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       author: "Current User",
       status: "In Progress", // Set initial status
       tone,
-    }))
+    }
+    setFormData(updatedData)
+    formDataRef.current = updatedData // Update ref
     // If custom type is selected, clear it if it's not 'Other'
     if (type !== "Other") {
       setCustomDocumentType("")
     }
     setHasUnsavedChanges(true) // Mark as unsaved when type changes
+    hasUnsavedChangesRef.current = true // Update ref
   }
 
   const handleNext = () => {
@@ -1989,6 +2122,7 @@ export default function CreateDocumentPage() {
     setCurrentStep(4)
     setShowPreview(true)
     setHasUnsavedChanges(false)
+    hasUnsavedChangesRef.current = false // Update ref
 
     const timestamp = new Date().toISOString()
     const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
@@ -2022,10 +2156,12 @@ export default function CreateDocumentPage() {
   }
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
+    const updatedData = {
+      ...formDataRef.current, // Use ref
       [field]: value,
-    }))
+    }
+    setFormData(updatedData)
+    formDataRef.current = updatedData // Update ref
     // Clear specific error if field is corrected
     if (errors[field]) {
       setErrors((prev) => {
@@ -2035,19 +2171,19 @@ export default function CreateDocumentPage() {
       })
     }
     setHasUnsavedChanges(true)
+    hasUnsavedChangesRef.current = true // Update ref
   }
 
   const handleNestedInputChange = (path: string[], value: any) => {
-    setFormData((prev: any) => {
-      const newData = { ...prev }
-      let current = newData
-      for (let i = 0; i < path.length - 1; i++) {
-        if (!current[path[i]]) current[path[i]] = {}
-        current = current[path[i]]
-      }
-      current[path[path.length - 1]] = value
-      return newData
-    })
+    const newData = { ...formDataRef.current } // Use ref
+    let current = newData
+    for (let i = 0; i < path.length - 1; i++) {
+      if (!current[path[i]]) current[path[i]] = {}
+      current = current[path[i]]
+    }
+    current[path[path.length - 1]] = value
+    setFormData(newData)
+    formDataRef.current = newData // Update ref
     const errorKey = path.join(".")
     // Clear specific error if field is corrected
     if (errors[errorKey]) {
@@ -2058,6 +2194,7 @@ export default function CreateDocumentPage() {
       })
     }
     setHasUnsavedChanges(true)
+    hasUnsavedChangesRef.current = true // Update ref
   }
 
   const validateForm = (): boolean => {
@@ -2160,6 +2297,7 @@ export default function CreateDocumentPage() {
     localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
     window.dispatchEvent(new Event("storage"))
     setHasUnsavedChanges(false)
+    hasUnsavedChangesRef.current = false // Update ref
     setShowSuccessMessage(true)
   }
 
@@ -2229,34 +2367,46 @@ export default function CreateDocumentPage() {
 
   const handleDownloadPDF = async () => {
     try {
+      console.log("[v0] Starting PDF download")
       const element = document.getElementById("document-preview-content")
       if (!element) {
+        console.error("[v0] Preview element not found")
         throw new Error("Preview element not found")
       }
 
       const safeTitle = documentTitle?.trim() ? documentTitle : "document"
 
-      // Show loading toast
       toast({
         title: "Generating PDF",
-        description: "Please wait while we generate your document...",
+        description: "Please wait, this may take a moment...",
       })
 
-      // Dynamically import libraries for client-side PDF generation
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      console.log("[v0] Loading html2canvas and jspdf libraries")
+      // Dynamically import libraries
       const html2canvas = (await import("html2canvas")).default
       const { jsPDF } = await import("jspdf")
 
-      // Capture the element as canvas with higher quality
+      console.log("[v0] Capturing element as canvas")
       const canvas = await html2canvas(element, {
-        scale: 3, // Increase resolution (3x the default)
+        scale: 2, // Reduced from 3 to improve performance on mobile
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         logging: false,
         backgroundColor: "#ffffff",
-        windowWidth: element.scrollWidth,
+        windowWidth: 1200, // Fixed width for consistency
         windowHeight: element.scrollHeight,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById("document-preview-content")
+          if (clonedElement) {
+            clonedElement.style.display = "block"
+            clonedElement.style.visibility = "visible"
+          }
+        },
       } as any)
 
+      console.log("[v0] Canvas captured, creating PDF")
       // Calculate dimensions for A4 page
       const imgWidth = 210 // A4 width in mm
       const pageHeight = 297 // A4 height in mm
@@ -2267,12 +2417,13 @@ export default function CreateDocumentPage() {
       const pdf = new jsPDF("p", "mm", "a4")
       let position = 0
 
-      // Add image to PDF (handle multiple pages if needed)
-      const imgData = canvas.toDataURL("image/jpeg", 1.0)
+      // Convert canvas to image
+      const imgData = canvas.toDataURL("image/jpeg", 0.95) // Slightly reduced quality for smaller file size
+      console.log("[v0] Adding image to PDF")
       pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight, undefined, "FAST")
       heightLeft -= pageHeight
 
-      // Add additional pages if content is longer than one page
+      // Add additional pages if needed
       while (heightLeft > 0) {
         position = heightLeft - imgHeight
         pdf.addPage()
@@ -2280,18 +2431,41 @@ export default function CreateDocumentPage() {
         heightLeft -= pageHeight
       }
 
-      // Save the PDF
-      pdf.save(`${safeTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`)
+      const fileName = `${safeTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`
+      console.log("[v0] Saving PDF:", fileName)
 
-      toast({
-        title: "PDF Downloaded",
-        description: "Your document has been saved as PDF",
-      })
+      try {
+        pdf.save(fileName)
+        console.log("[v0] PDF saved successfully")
+        toast({
+          title: "PDF Downloaded",
+          description: "Your document has been saved as PDF",
+        })
+      } catch (saveError) {
+        console.log("[v0] Direct save failed, trying blob URL method")
+        const blob = pdf.output("blob")
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = fileName
+        a.style.display = "none"
+        document.body.appendChild(a)
+        a.click()
+        setTimeout(() => {
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+        }, 100)
+        console.log("[v0] PDF downloaded via blob URL")
+        toast({
+          title: "PDF Ready",
+          description: "Your document is ready for download",
+        })
+      }
     } catch (error: any) {
-      console.error("PDF generation error:", error)
+      console.error("[v0] PDF generation error:", error)
       toast({
         title: "Download Failed",
-        description: "Unable to generate PDF. Please try again.",
+        description: error.message || "Unable to generate PDF. Please try again.",
         variant: "destructive",
       })
     }
@@ -2573,6 +2747,7 @@ export default function CreateDocumentPage() {
                         onClick={() => {
                           setTone(option.value as any)
                           setHasUnsavedChanges(true)
+                          hasUnsavedChangesRef.current = true // Update ref
                         }}
                         className={`p-4 border-2 transition-all hover:border-primary/50 rounded-lg text-center ${
                           tone === option.value ? "border-primary bg-primary/5" : "border-border bg-card"
@@ -2599,6 +2774,7 @@ export default function CreateDocumentPage() {
                       value={documentTitle}
                       onChange={(e) => {
                         setDocumentTitle(e.target.value)
+                        documentTitleRef.current = e.target.value // Update ref
                         if (errors.documentTitle) {
                           setErrors((prev) => {
                             const newErrors = { ...prev }
@@ -2607,6 +2783,7 @@ export default function CreateDocumentPage() {
                           })
                         }
                         setHasUnsavedChanges(true)
+                        hasUnsavedChangesRef.current = true // Update ref
                       }}
                       placeholder="e.g., Q4 2024 Consulting Agreement"
                       className={errors.documentTitle ? "border-destructive" : ""}
