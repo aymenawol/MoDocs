@@ -37,10 +37,6 @@
     "@radix-ui/react-toggle": "1.1.1",
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
-<<<<<<< HEAD
-=======
-    "@sparticuz/chromium": "latest",
->>>>>>> 8b53180b304908529f6679c3a91c71d98a8e0a97
     "@vercel/analytics": "latest",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
@@ -48,17 +44,12 @@
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
-    "html2canvas": "^1.4.1",
+    "html2canvas": "latest",
     "input-otp": "1.4.1",
-    "jspdf": "^3.0.3",
+    "jspdf": "latest",
     "lucide-react": "^0.454.0",
     "next": "16.0.0",
     "next-themes": "latest",
-<<<<<<< HEAD
-=======
-    "puppeteer": "latest",
-    "puppeteer-core": "latest",
->>>>>>> 8b53180b304908529f6679c3a91c71d98a8e0a97
     "react": "19.2.0",
     "react-day-picker": "9.8.0",
     "react-dom": "19.2.0",
