@@ -225,6 +225,158 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
         </div>
       )
+    } else if (documentType === "Purchase Order") {
+      const poNumber = formData.poNumber || "PO-2025-001"
+      const poDate = formData.poDate || new Date().toLocaleDateString()
+      const deliveryDate = formData.deliveryDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString()
+      const buyerCompany = formData.buyerInfo?.company || "Your Company Name"
+      const buyerAddress = formData.buyerInfo?.address || "123 Business St, City, State 12345"
+      const buyerContact = formData.buyerInfo?.contact || "John Doe"
+      const supplierCompany = formData.supplierInfo?.company || "Supplier Company"
+      const supplierAddress = formData.supplierInfo?.address || "456 Vendor Ave, City, State 67890"
+      const totalAmount = formData.totalAmount || "0.00"
+      const paymentTerms = formData.paymentTerms || "Net 30 days"
+
+      return (
+        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="border-b-2 border-black pb-4">
+            <h1 className="text-3xl font-bold uppercase tracking-wide">Purchase Order</h1>
+            <p className="text-sm mt-1">PO Number: {poNumber}</p>
+          </div>
+
+          {/* Buyer and Supplier Information */}
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2 text-gray-600">Buyer (Bill To):</p>
+              <p className="font-bold text-base">{buyerCompany}</p>
+              <p className="text-sm">{buyerAddress}</p>
+              <p className="text-sm mt-2">Attn: {buyerContact}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2 text-gray-600">Vendor (Ship From):</p>
+              <p className="font-bold text-base">{supplierCompany}</p>
+              <p className="text-sm">{supplierAddress}</p>
+            </div>
+          </div>
+
+          {/* Order Details */}
+          <div className="grid grid-cols-3 gap-6 text-sm">
+            <div>
+              <p className="font-bold">PO Date:</p>
+              <p>{poDate}</p>
+            </div>
+            <div>
+              <p className="font-bold">Required Delivery Date:</p>
+              <p>{deliveryDate}</p>
+            </div>
+            <div>
+              <p className="font-bold">Payment Terms:</p>
+              <p>{paymentTerms}</p>
+            </div>
+          </div>
+
+          {/* Line Items Table */}
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b-2 border-black">
+                <th className="text-left py-2 font-bold">Item #</th>
+                <th className="text-left py-2 font-bold">Description</th>
+                <th className="text-right py-2 font-bold">Qty</th>
+                <th className="text-right py-2 font-bold">Unit Price</th>
+                <th className="text-right py-2 font-bold">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-gray-300">
+                <td className="py-3">001</td>
+                <td className="py-3">Office Supplies - Premium Paper (Case of 10 Reams)</td>
+                <td className="text-right py-3">5</td>
+                <td className="text-right py-3">$45.00</td>
+                <td className="text-right py-3">$225.00</td>
+              </tr>
+              <tr className="border-b border-gray-300">
+                <td className="py-3">002</td>
+                <td className="py-3">Printer Toner Cartridges - Black (Pack of 2)</td>
+                <td className="text-right py-3">10</td>
+                <td className="text-right py-3">$120.00</td>
+                <td className="text-right py-3">$1,200.00</td>
+              </tr>
+              <tr className="border-b border-gray-300">
+                <td className="py-3">003</td>
+                <td className="py-3">Ergonomic Office Chairs - Model EX-2000</td>
+                <td className="text-right py-3">15</td>
+                <td className="text-right py-3">$450.00</td>
+                <td className="text-right py-3">$6,750.00</td>
+              </tr>
+              <tr className="border-b border-gray-300">
+                <td className="py-3">004</td>
+                <td className="py-3">Standing Desks - Adjustable Height</td>
+                <td className="text-right py-3">8</td>
+                <td className="text-right py-3">$650.00</td>
+                <td className="text-right py-3">$5,200.00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Totals */}
+          <div className="flex justify-end">
+            <div className="w-72 space-y-2 text-sm">
+              <div className="flex justify-between border-b border-gray-300 pb-2">
+                <span>Subtotal:</span>
+                <span>$13,375.00</span>
+              </div>
+              <div className="flex justify-between border-b border-gray-300 pb-2">
+                <span>Shipping & Handling:</span>
+                <span>$250.00</span>
+              </div>
+              <div className="flex justify-between border-b border-gray-300 pb-2">
+                <span>Tax (7.5%):</span>
+                <span>$1,021.88</span>
+              </div>
+              <div className="flex justify-between border-t-2 border-black pt-2 font-bold text-lg">
+                <span>TOTAL:</span>
+                <span>${totalAmount === "0.00" ? "14,646.88" : totalAmount}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Special Instructions */}
+          <div className="border-t border-gray-300 pt-4">
+            <p className="font-bold text-sm mb-2">SPECIAL INSTRUCTIONS:</p>
+            <p className="text-xs text-gray-700">
+              {getToneContent(
+                "Please ensure all items are delivered to the receiving dock at the main entrance. Contact the purchasing department at least 24 hours before delivery. All items must be inspected upon arrival.",
+              )}
+            </p>
+          </div>
+
+          {/* Terms and Conditions */}
+          <div className="text-xs text-gray-600 border-t border-gray-300 pt-4">
+            <p className="font-bold mb-1">TERMS AND CONDITIONS:</p>
+            <p>1. This Purchase Order number must appear on all invoices, packing slips, and correspondence.</p>
+            <p>2. Please notify buyer immediately if you are unable to ship as specified.</p>
+            <p>
+              3. Materials received may be subject to inspection and testing. Defective materials will be returned at
+              supplier's expense.
+            </p>
+          </div>
+
+          {/* Authorization */}
+          <div className="grid grid-cols-2 gap-12 pt-8 mt-6 border-t border-black">
+            <div>
+              <div className="border-b border-black mb-2 h-10"></div>
+              <p className="text-xs font-bold">Authorized Buyer Signature</p>
+              <p className="text-xs text-gray-600">Date: {poDate}</p>
+            </div>
+            <div>
+              <div className="border-b border-black mb-2 h-10"></div>
+              <p className="text-xs font-bold">Vendor Acceptance Signature</p>
+              <p className="text-xs text-gray-600">Date: ______________</p>
+            </div>
+          </div>
+        </div>
+      )
     } else if (documentType === "Contract") {
       const contractTitle = formData.contractTitle || documentTitle || "Service Agreement"
       const partyA = formData.partyA || "[First Party Name]"
@@ -870,6 +1022,192 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
         </div>
       )
+    } else if (documentType === "Report") {
+      // Added Report Form Preview
+      const reportTitle = formData.reportTitle || documentTitle || "Report"
+      const executiveSummary = formData.executiveSummary || ""
+      const introduction = formData.introduction || ""
+      const methodology = formData.methodology || ""
+      const conclusions = formData.conclusions || ""
+
+      return (
+        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-8 mb-8">
+            <h1 className="text-3xl font-bold uppercase mb-4">{reportTitle}</h1>
+            <p className="text-lg">Report</p>
+            <p className="text-sm mt-4">Generated on: {new Date().toLocaleDateString()}</p>
+          </div>
+
+          {/* Executive Summary */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Executive Summary</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {executiveSummary ||
+                getToneContent(
+                  "This report provides a comprehensive overview of the key findings and insights related to the subject matter. It aims to inform stakeholders and guide future decision-making.",
+                )}
+            </p>
+          </div>
+
+          {/* Introduction */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Introduction</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {introduction ||
+                getToneContent(
+                  "This section outlines the purpose, scope, and objectives of this report. It sets the context for the subsequent analysis and findings.",
+                )}
+            </p>
+          </div>
+
+          {/* Methodology */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Methodology</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {methodology ||
+                getToneContent(
+                  "The findings presented in this report are based on rigorous research and analysis. The methodology employed involved [describe methods, e.g., data collection, statistical analysis, interviews].",
+                )}
+            </p>
+          </div>
+
+          {/* Findings */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Key Findings</h2>
+            <ul className="list-disc pl-6 space-y-2 text-sm">
+              <li>{getToneContent("Finding 1: Significant trend observed in [area].")}</li>
+              <li>{getToneContent("Finding 2: Correlation identified between [variable A] and [variable B].")}</li>
+              <li>{getToneContent("Finding 3: Anomaly detected in [dataset].")}</li>
+            </ul>
+          </div>
+
+          {/* Conclusions */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Conclusions</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {conclusions ||
+                getToneContent(
+                  "Based on the analysis, the primary conclusions drawn are that [summarize key conclusions]. These findings have significant implications for [stakeholders/future actions].",
+                )}
+            </p>
+          </div>
+
+          {/* Recommendations */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Recommendations</h2>
+            <ul className="list-disc pl-6 space-y-2 text-sm">
+              <li>{getToneContent("Recommendation 1: Implement strategies to address [finding].")}</li>
+              <li>{getToneContent("Recommendation 2: Further investigate [area of interest].")}</li>
+              <li>{getToneContent("Recommendation 3: Allocate resources towards [specific action].")}</li>
+            </ul>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Financial Statement") {
+      const companyName = formData.companyInfo?.name || "Your Company Name"
+      const reportingPeriod = formData.companyInfo?.reportingPeriod || "Current Period"
+      const netIncome =
+        formData.incomeStatement?.netIncome !== undefined
+          ? `$${formData.incomeStatement.netIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          : "$0.00"
+      const notes = formData.notes || "No specific notes provided."
+      const preparer = formData.preparer || "N/A"
+
+      return (
+        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-8 mb-8">
+            <h1 className="text-3xl font-bold uppercase mb-4">{companyName}</h1>
+            <p className="text-lg">Financial Statement</p>
+            <p className="text-sm">For the Period Ending: {reportingPeriod}</p>
+          </div>
+
+          {/* Income Statement Summary */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Income Statement Summary</h2>
+            <table className="w-full text-sm">
+              <tbody>
+                <tr>
+                  <td className="py-2 font-bold">Net Income:</td>
+                  <td className="text-right py-2 font-bold">{netIncome}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Notes to Financial Statement</h2>
+            <p className="text-sm leading-relaxed">{notes}</p>
+          </div>
+
+          {/* Preparer Information */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <p className="text-sm">
+              Prepared By: <span className="font-bold">{preparer}</span>
+            </p>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Work Order") {
+      const woNumber = formData.workOrderNumber || "WO-0000"
+      const woDate = formData.workOrderDate || new Date().toLocaleDateString()
+      const clientName = formData.clientInfo?.name || "[Client Name]"
+      const workDescription = formData.workDescription || "[Description of work]"
+      const estCompletionDate = formData.estimatedCompletionDate || "As soon as possible"
+      const priority = formData.priority || "Medium"
+
+      return (
+        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-8 mb-8">
+            <h1 className="text-3xl font-bold uppercase mb-4">Work Order</h1>
+            <p className="text-sm">WO#: {woNumber}</p>
+          </div>
+
+          {/* Work Order Details */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Work Order Details</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-bold">Date Issued:</p>
+                <p>{woDate}</p>
+              </div>
+              <div>
+                <p className="font-bold">Client:</p>
+                <p>{clientName}</p>
+              </div>
+              <div>
+                <p className="font-bold">Priority:</p>
+                <p>{priority}</p>
+              </div>
+              <div>
+                <p className="font-bold">Estimated Completion:</p>
+                <p>{estCompletionDate}</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className="font-bold">Description of Work:</p>
+              <p className="text-sm leading-relaxed pt-2">{workDescription}</p>
+            </div>
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized By</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
     } else {
       // Generic document for other types including custom "Other" types
       return (
@@ -1050,6 +1388,7 @@ export default function CreateDocumentPage() {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [documentGenerated, setDocumentGenerated] = useState(false) // Fixed status tracking - document is only complete when generated
 
   const formDataRef = useRef(formData)
   const documentTitleRef = useRef(documentTitle)
@@ -1116,6 +1455,7 @@ export default function CreateDocumentPage() {
     if (previewId) {
       setCurrentStep(4)
       setShowPreview(true)
+      setDocumentGenerated(doc.status === "Completed") // Set generated status based on stored data
       setHasUnsavedChanges(false)
     } else {
       setCurrentStep(3)
@@ -1157,7 +1497,8 @@ export default function CreateDocumentPage() {
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChangesRef.current && formDataRef.current.status !== "completed") {
+      if (hasUnsavedChangesRef.current && !documentGenerated) {
+        // Updated beforeunload to only show dialog if not generated
         e.preventDefault()
         e.returnValue = ""
       }
@@ -1174,7 +1515,7 @@ export default function CreateDocumentPage() {
       documentType: documentTypeRef.current === "Other" ? customDocumentType : documentTypeRef.current,
       ...(documentTypeRef.current === "Other" ? { customDocumentType } : {}),
       tone,
-      status: "In Progress",
+      status: documentGenerated ? "Completed" : "In Progress", // Updated saveInProgress to use proper status based on generation
       updatedAt: new Date().toISOString(),
       id: editingDocId || formDataRef.current.id || `doc-${Date.now()}`,
       createdAt: formDataRef.current.createdAt || new Date().toISOString(),
@@ -1197,7 +1538,8 @@ export default function CreateDocumentPage() {
   }
 
   const handleNavigation = (path: string) => {
-    if (hasUnsavedChanges && formData.status !== "completed") {
+    if (hasUnsavedChanges && !documentGenerated) {
+      // Updated handleNavigation to only show dialog if not generated
       setPendingNavigation(path)
       setShowUnsavedDialog(true)
     } else {
@@ -1298,6 +1640,7 @@ export default function CreateDocumentPage() {
       if (!formData.totalAmount || Number.parseFloat(formData.totalAmount) <= 0)
         newErrors.totalAmount = "Total amount must be greater than 0"
     } else if (documentType === "Contract") {
+      if (!formData.contractTitle?.trim()) newErrors.contractTitle = "Contract title is required"
       if (!formData.partyA?.trim()) newErrors.partyA = "First party name is required"
       if (!formData.partyB?.trim()) newErrors.partyB = "Second party name is required"
       if (!formData.duration?.trim()) newErrors.duration = "Duration is required"
@@ -1333,6 +1676,7 @@ export default function CreateDocumentPage() {
     setIsGenerating(false)
     setCurrentStep(4)
     setShowPreview(true)
+    setDocumentGenerated(true) // Mark as generated
     setHasUnsavedChanges(true)
 
     const timestamp = new Date().toISOString()
@@ -1343,7 +1687,7 @@ export default function CreateDocumentPage() {
       documentType: finalDocumentType,
       customDocumentType: documentType === "Other" ? customDocumentType : undefined,
       title: documentTitle,
-      status: "Completed",
+      status: "Completed", // Completed because generated
       createdAt: formData.createdAt || timestamp,
       updatedAt: timestamp,
       tone,
@@ -1572,6 +1916,7 @@ export default function CreateDocumentPage() {
     })
   }
 
+  // Enhanced PDF generation
   const handleDownloadPDF = async () => {
     try {
       const element = document.getElementById("document-preview-content")
@@ -1581,7 +1926,6 @@ export default function CreateDocumentPage() {
 
       const safeTitle = documentTitle?.trim() ? documentTitle : "document"
 
-      // Show loading toast
       toast({
         title: "Generating PDF",
         description: "Please wait while we generate your document...",
@@ -1591,16 +1935,53 @@ export default function CreateDocumentPage() {
       const html2canvas = (await import("html2canvas")).default
       const { jsPDF } = await import("jspdf")
 
-      // Capture the element as canvas with higher quality
-      const canvas = await html2canvas(element, {
+      // Clone the element and apply inline styles for better rendering
+      const clone = element.cloneNode(true) as HTMLElement
+      clone.style.position = "absolute"
+      clone.style.left = "-9999px"
+      clone.style.top = "0"
+      document.body.appendChild(clone)
+
+      // Force all borders to be explicit for html2canvas
+      const allElements = clone.querySelectorAll("*")
+      allElements.forEach((el) => {
+        const element = el as HTMLElement
+        const styles = window.getComputedStyle(element)
+
+        // Apply computed border styles as inline styles
+        if (styles.borderTopWidth && styles.borderTopWidth !== "0px") {
+          element.style.borderTop = `${styles.borderTopWidth} ${styles.borderTopStyle} ${styles.borderTopColor}`
+        }
+        if (styles.borderBottomWidth && styles.borderBottomWidth !== "0px") {
+          element.style.borderBottom = `${styles.borderBottomWidth} ${styles.borderBottomStyle} ${styles.borderBottomColor}`
+        }
+        if (styles.borderLeftWidth && styles.borderLeftWidth !== "0px") {
+          element.style.borderLeft = `${styles.borderLeftWidth} ${styles.borderLeftStyle} ${styles.borderLeftColor}`
+        }
+        if (styles.borderRightWidth && styles.borderRightWidth !== "0px") {
+          element.style.borderRight = `${styles.borderRightWidth} ${styles.borderRightStyle} ${styles.borderRightColor}`
+        }
+      })
+
+      // Capture with enhanced settings
+      const canvas = await html2canvas(clone, {
         scale: 3, // Increase resolution (3x the default)
         useCORS: true,
         allowTaint: true,
         logging: false,
         backgroundColor: "#ffffff",
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
+        windowWidth: clone.scrollWidth,
+        windowHeight: clone.scrollHeight,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById("document-preview-content")
+          if (clonedElement) {
+            clonedElement.style.display = "block"
+          }
+        },
       } as any)
+
+      // Clean up the clone
+      document.body.removeChild(clone)
 
       // Calculate dimensions for A4 page
       const imgWidth = 210 // A4 width in mm
@@ -1759,6 +2140,7 @@ export default function CreateDocumentPage() {
                     setEditingDocId(null)
                     setCurrentStep(1)
                     setShowPreview(false)
+                    setDocumentGenerated(false) // Reset generated status
                   }}
                 >
                   Create Another Document
