@@ -870,16 +870,12 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 <h1 className="text-3xl font-bold uppercase">Work Order</h1>
                 <p className="text-sm mt-1">WO #: {workOrderNumber}</p>
               </div>
-              <div
-                className={`px-4 py-2 font-bold text-sm ${priority === "Urgent" ? "bg-red-200 text-red-900" : priority === "High" ? "bg-orange-200 text-orange-900" : priority === "Medium" ? "bg-yellow-200 text-yellow-900" : "bg-green-200 text-green-900"}`}
-              >
-                PRIORITY: {priority}
-              </div>
+              <div className="border-2 border-black px-4 py-2 font-bold text-sm">PRIORITY: {priority}</div>
             </div>
           </div>
 
           {/* Work Order Details */}
-          <div className="grid grid-cols-2 gap-6 text-sm border-b border-gray-300 pb-6">
+          <div className="grid grid-cols-2 gap-6 text-sm border-b border-black pb-6">
             <div>
               <p className="font-bold mb-1">Work Order Date:</p>
               <p>{workOrderDate}</p>
@@ -891,7 +887,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Client Information */}
-          <div className="border border-gray-300 p-4">
+          <div className="border border-black p-4">
             <p className="font-bold text-sm uppercase tracking-wider mb-2">Client Information:</p>
             <p className="font-semibold">{clientName}</p>
             <p className="text-sm">{formData.clientInfo?.address || "123 Client Street, City, ST 12345"}</p>
@@ -900,8 +896,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Work Description */}
           <div>
-            <p className="font-bold text-sm uppercase tracking-wider mb-2 bg-gray-200 p-2">Work Description:</p>
-            <p className="text-sm text-justify leading-relaxed p-4 border border-gray-300">
+            <p className="font-bold text-sm uppercase tracking-wider mb-2 bg-white border-b-2 border-black p-2">
+              Work Description:
+            </p>
+            <p className="text-sm text-justify leading-relaxed p-4 border border-black">
               {formData.workDescription ||
                 getToneContent(
                   "Complete maintenance and inspection of HVAC system including filter replacement, duct cleaning, and system calibration. Address reported temperature control issues.",
@@ -930,9 +928,9 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Notes Section */}
-          <div className="border-t border-gray-300 pt-4">
+          <div className="border-t border-black pt-4">
             <p className="font-bold text-sm uppercase tracking-wider mb-2">Special Notes:</p>
-            <div className="bg-yellow-50 border border-yellow-300 p-3 text-sm">
+            <div className="border border-black p-3 text-sm">
               {getToneContent(
                 "All work must be completed in accordance with safety regulations. Client representative must sign off upon completion.",
               )}
@@ -1248,6 +1246,143 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="mt-1">
               <span className="font-bold">Date:</span> {date}
             </p>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
           </div>
         </div>
       )
@@ -2402,6 +2537,45 @@ export default function CreateDocumentPage() {
           if (clonedElement) {
             clonedElement.style.display = "block"
             clonedElement.style.visibility = "visible"
+
+            // Convert all colors to standard RGB/hex to avoid parsing errors
+            const allElements = clonedElement.querySelectorAll("*")
+            allElements.forEach((el: Element) => {
+              const htmlEl = el as HTMLElement
+              const computedStyle = window.getComputedStyle(htmlEl)
+
+              // Convert color properties to standard format
+              const colorProps = [
+                "color",
+                "backgroundColor",
+                "borderColor",
+                "borderTopColor",
+                "borderRightColor",
+                "borderBottomColor",
+                "borderLeftColor",
+              ]
+              colorProps.forEach((prop) => {
+                const value = computedStyle.getPropertyValue(prop)
+                if (value && value !== "transparent" && value !== "rgba(0, 0, 0, 0)") {
+                  // Force recomputation to RGB
+                  htmlEl.style.setProperty(prop, value, "important")
+                }
+              })
+
+              // Ensure borders are visible with inline styles
+              if (computedStyle.borderTopWidth && computedStyle.borderTopWidth !== "0px") {
+                htmlEl.style.borderTop = `${computedStyle.borderTopWidth} ${computedStyle.borderTopStyle} ${computedStyle.borderTopColor}`
+              }
+              if (computedStyle.borderBottomWidth && computedStyle.borderBottomWidth !== "0px") {
+                htmlEl.style.borderBottom = `${computedStyle.borderBottomWidth} ${computedStyle.borderBottomStyle} ${computedStyle.borderBottomColor}`
+              }
+              if (computedStyle.borderLeftWidth && computedStyle.borderLeftWidth !== "0px") {
+                htmlEl.style.borderLeft = `${computedStyle.borderLeftWidth} ${computedStyle.borderLeftStyle} ${computedStyle.borderLeftColor}`
+              }
+              if (computedStyle.borderRightWidth && computedStyle.borderRightWidth !== "0px") {
+                htmlEl.style.borderRight = `${computedStyle.borderRightWidth} ${computedStyle.borderRightStyle} ${computedStyle.borderRightColor}`
+              }
+            })
           }
         },
       } as any)
