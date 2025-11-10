@@ -1411,59 +1411,42 @@ export default function CreateDocumentPage() {
         description: "Please wait while we generate your document...",
       })
 
-      // Get the HTML content with all styles
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${documentTitle}</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-              * {
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              }
-              body {
-                margin: 0;
-                padding: 40px;
-                background: white;
-              }
-            </style>
-          </head>
-          <body>
-            ${element.innerHTML}
-          </body>
-        </html>
-      `
+      // Dynamically import libraries for client-side PDF generation
+      const html2canvas = (await import("html2canvas")).default
+      const { jsPDF } = await import("jspdf")
 
-      // Send to API for PDF generation
-      const response = await fetch("/api/generate-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          html: htmlContent,
-          fileName: documentTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase(),
-        }),
-      })
+      // Capture the element as canvas with higher quality
+      const canvas = await html2canvas(element, {
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      } as any)
 
-      if (!response.ok) {
-        throw new Error("PDF generation failed")
+      // Calculate dimensions for A4 page
+      const imgWidth = 210 // A4 width in mm
+      const pageHeight = 297 // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      let heightLeft = imgHeight
+
+      // Create PDF
+      const pdf = new jsPDF("p", "mm", "a4")
+      let position = 0
+
+      // Add image to PDF (handle multiple pages if needed)
+      const imgData = canvas.toDataURL("image/png")
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
+
+      // Add additional pages if content is longer than one page
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
       }
 
-      // Download the PDF
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-  link.download = `${safeTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      // Save the PDF
+      pdf.save(`${safeTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`)
 
       toast({
         title: "PDF Downloaded",
