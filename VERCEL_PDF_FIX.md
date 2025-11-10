@@ -21,11 +21,11 @@ Created `vercel.json` with optimized settings for the PDF generation function:
 ## Deployment Steps
 
 ### Option 1: Deploy via Vercel CLI
-```bash
+\`\`\`bash
 npm install -g vercel
 vercel login
 vercel --prod
-```
+\`\`\`
 
 ### Option 2: Deploy via Vercel Dashboard
 1. Push your code to GitHub
@@ -35,11 +35,11 @@ vercel --prod
 
 ### Option 3: Deploy via Git Integration
 If already connected to Vercel:
-```bash
+\`\`\`bash
 git add .
 git commit -m "Fix PDF download for Vercel deployment"
 git push origin main
-```
+\`\`\`
 Vercel will automatically deploy the changes.
 
 ## Testing on Vercel
@@ -73,9 +73,9 @@ The PDF generation should work locally with regular Puppeteer. If you see Chrome
 ## Environment Detection
 
 The code automatically detects if running on Vercel by checking:
-```typescript
+\`\`\`typescript
 process.env.VERCEL === "1"
-```
+\`\`\`
 
 On Vercel: Uses puppeteer-core + @sparticuz/chromium
 Locally: Uses regular puppeteer with system Chrome
