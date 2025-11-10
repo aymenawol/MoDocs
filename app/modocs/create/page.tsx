@@ -733,6 +733,661 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
         </div>
       )
+    } else if (documentType === "Purchase Order") {
+      const poNumber = formData.poNumber || "PO-2025-001"
+      const poDate = formData.poDate || new Date().toLocaleDateString()
+      const deliveryDate = formData.deliveryDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString()
+      const buyerCompany = formData.buyerInfo?.company || "[Buyer Company]"
+      const supplierCompany = formData.supplierInfo?.company || "[Supplier Company]"
+
+      return (
+        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4">
+            <h1 className="text-3xl font-bold uppercase tracking-wide">Purchase Order</h1>
+            <p className="text-sm mt-2">PO Number: {poNumber}</p>
+          </div>
+
+          {/* Buyer/Supplier Section */}
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2 bg-gray-200 p-2">Buyer Information:</p>
+              <p className="font-semibold">{buyerCompany}</p>
+              <p className="text-sm">{formData.buyerInfo?.address || "123 Buyer Street, City, ST 12345"}</p>
+              <p className="text-sm">{formData.buyerInfo?.contact || "Contact: John Doe, Procurement"}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2 bg-gray-200 p-2">Supplier Information:</p>
+              <p className="font-semibold">{supplierCompany}</p>
+              <p className="text-sm">{formData.supplierInfo?.address || "456 Supplier Ave, City, ST 54321"}</p>
+              <p className="text-sm">{formData.supplierInfo?.contact || "Contact: Jane Smith, Sales"}</p>
+            </div>
+          </div>
+
+          {/* Order Details */}
+          <div className="grid grid-cols-3 gap-8 text-sm border-y border-gray-300 py-4">
+            <div>
+              <p className="font-bold">PO Date:</p>
+              <p>{poDate}</p>
+            </div>
+            <div>
+              <p className="font-bold">Required Delivery Date:</p>
+              <p>{deliveryDate}</p>
+            </div>
+            <div>
+              <p className="font-bold">Payment Terms:</p>
+              <p>{formData.paymentTerms || "Net 30"}</p>
+            </div>
+          </div>
+
+          {/* Line Items Table */}
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b-2 border-black bg-gray-100">
+                <th className="text-left py-2 px-2 font-bold">Item</th>
+                <th className="text-left py-2 px-2 font-bold">Description</th>
+                <th className="text-center py-2 px-2 font-bold">Qty</th>
+                <th className="text-right py-2 px-2 font-bold">Unit Price</th>
+                <th className="text-right py-2 px-2 font-bold">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-gray-300">
+                <td className="py-3 px-2">1</td>
+                <td className="py-3 px-2">Office Chairs - Ergonomic Model X200</td>
+                <td className="text-center py-3 px-2">25</td>
+                <td className="text-right py-3 px-2">$350.00</td>
+                <td className="text-right py-3 px-2">$8,750.00</td>
+              </tr>
+              <tr className="border-b border-gray-300">
+                <td className="py-3 px-2">2</td>
+                <td className="py-3 px-2">Standing Desks - Professional Series</td>
+                <td className="text-center py-3 px-2">15</td>
+                <td className="text-right py-3 px-2">$800.00</td>
+                <td className="text-right py-3 px-2">$12,000.00</td>
+              </tr>
+              <tr className="border-b border-gray-300">
+                <td className="py-3 px-2">3</td>
+                <td className="py-3 px-2">Monitor Arms - Dual Mount</td>
+                <td className="text-center py-3 px-2">30</td>
+                <td className="text-right py-3 px-2">$125.00</td>
+                <td className="text-right py-3 px-2">$3,750.00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Total */}
+          <div className="flex justify-end">
+            <div className="w-64 space-y-2 text-sm border-t-2 border-black pt-4">
+              <div className="flex justify-between font-bold text-lg">
+                <span>TOTAL:</span>
+                <span>${formData.totalAmount || "24,500.00"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Special Instructions */}
+          <div className="text-sm border-t border-gray-300 pt-4">
+            <p className="font-bold mb-2">SPECIAL INSTRUCTIONS:</p>
+            <p className="text-gray-700">
+              {formData.specialInstructions ||
+                getToneContent(
+                  "Please deliver items to the main warehouse loading dock between 8 AM - 4 PM. Contact receiving department 24 hours prior to delivery.",
+                )}
+            </p>
+          </div>
+
+          {/* Authorization */}
+          <div className="border-t-2 border-black pt-6 mt-6">
+            <div className="grid grid-cols-2 gap-12">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized by: {formData.approvalSignature || "[Signature]"}</p>
+                <p className="text-xs">Procurement Manager</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Work Order") {
+      const workOrderNumber = formData.workOrderNumber || "WO-2025-001"
+      const workOrderDate = formData.workOrderDate || new Date().toLocaleDateString()
+      const clientName = formData.clientInfo?.name || "[Client Name]"
+      const completionDate =
+        formData.estimatedCompletionDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()
+      const priority = formData.priority || "Medium"
+
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="border-b-2 border-black pb-4 mb-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold uppercase">Work Order</h1>
+                <p className="text-sm mt-1">WO #: {workOrderNumber}</p>
+              </div>
+              <div
+                className={`px-4 py-2 font-bold text-sm ${priority === "Urgent" ? "bg-red-200 text-red-900" : priority === "High" ? "bg-orange-200 text-orange-900" : priority === "Medium" ? "bg-yellow-200 text-yellow-900" : "bg-green-200 text-green-900"}`}
+              >
+                PRIORITY: {priority}
+              </div>
+            </div>
+          </div>
+
+          {/* Work Order Details */}
+          <div className="grid grid-cols-2 gap-6 text-sm border-b border-gray-300 pb-6">
+            <div>
+              <p className="font-bold mb-1">Work Order Date:</p>
+              <p>{workOrderDate}</p>
+            </div>
+            <div>
+              <p className="font-bold mb-1">Estimated Completion:</p>
+              <p>{completionDate}</p>
+            </div>
+          </div>
+
+          {/* Client Information */}
+          <div className="border border-gray-300 p-4">
+            <p className="font-bold text-sm uppercase tracking-wider mb-2">Client Information:</p>
+            <p className="font-semibold">{clientName}</p>
+            <p className="text-sm">{formData.clientInfo?.address || "123 Client Street, City, ST 12345"}</p>
+            <p className="text-sm">{formData.clientInfo?.phone || "Phone: (555) 123-4567"}</p>
+          </div>
+
+          {/* Work Description */}
+          <div>
+            <p className="font-bold text-sm uppercase tracking-wider mb-2 bg-gray-200 p-2">Work Description:</p>
+            <p className="text-sm text-justify leading-relaxed p-4 border border-gray-300">
+              {formData.workDescription ||
+                getToneContent(
+                  "Complete maintenance and inspection of HVAC system including filter replacement, duct cleaning, and system calibration. Address reported temperature control issues.",
+                )}
+            </p>
+          </div>
+
+          {/* Assigned Personnel */}
+          <div>
+            <p className="font-bold text-sm uppercase tracking-wider mb-2">Assigned Personnel:</p>
+            <ul className="list-disc pl-6 text-sm space-y-1">
+              <li>{formData.assignedPersonnel?.[0] || "Lead Technician - John Smith"}</li>
+              <li>{formData.assignedPersonnel?.[1] || "Technician - Sarah Johnson"}</li>
+              <li>{formData.assignedPersonnel?.[2] || "Assistant - Mike Wilson"}</li>
+            </ul>
+          </div>
+
+          {/* Materials Required */}
+          <div>
+            <p className="font-bold text-sm uppercase tracking-wider mb-2">Materials Required:</p>
+            <ul className="list-disc pl-6 text-sm space-y-1">
+              <li>{formData.materialsRequired?.[0] || "Standard filters and replacement parts"}</li>
+              <li>{formData.materialsRequired?.[1] || "Cleaning equipment and supplies"}</li>
+              <li>{formData.materialsRequired?.[2] || "Safety equipment and PPE"}</li>
+            </ul>
+          </div>
+
+          {/* Notes Section */}
+          <div className="border-t border-gray-300 pt-4">
+            <p className="font-bold text-sm uppercase tracking-wider mb-2">Special Notes:</p>
+            <div className="bg-yellow-50 border border-yellow-300 p-3 text-sm">
+              {getToneContent(
+                "All work must be completed in accordance with safety regulations. Client representative must sign off upon completion.",
+              )}
+            </div>
+          </div>
+
+          {/* Signatures */}
+          <div className="grid grid-cols-2 gap-12 pt-6 mt-6 border-t-2 border-black">
+            <div className="space-y-6">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Supervisor Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Client Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Report") {
+      const reportTitle = formData.reportTitle || documentTitle || "Quarterly Business Report"
+      const executiveSummary = formData.executiveSummary || ""
+      const date = formData.date || new Date().toLocaleDateString()
+
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Cover Page */}
+          <div className="text-center border-b-2 border-black pb-8 mb-8">
+            <h1 className="text-3xl font-bold uppercase mb-6">{reportTitle}</h1>
+            <p className="text-lg mb-4">Comprehensive Analysis and Findings</p>
+            <p className="text-sm">Report Date: {date}</p>
+            <p className="text-sm mt-6 text-gray-600">Prepared by: {formData.preparer || "Research Department"}</p>
+          </div>
+
+          {/* Executive Summary */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">Executive Summary</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {executiveSummary ||
+                getToneContent(
+                  "This report presents a comprehensive analysis of key performance indicators, market trends, and operational metrics for the reporting period. Our findings indicate strong growth patterns and identify several opportunities for strategic enhancement.",
+                )}
+            </p>
+          </div>
+
+          {/* Introduction */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">1. Introduction</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {formData.introduction ||
+                getToneContent(
+                  "The purpose of this report is to provide stakeholders with detailed insights into organizational performance, market conditions, and strategic positioning. This analysis covers multiple dimensions including financial metrics, operational efficiency, and market dynamics.",
+                )}
+            </p>
+          </div>
+
+          {/* Methodology */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">2. Methodology</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {formData.methodology ||
+                getToneContent(
+                  "This research employed a mixed-methods approach combining quantitative data analysis with qualitative assessments. Primary data sources include internal operational reports, customer surveys, and market research databases. All findings have been validated through multiple verification processes.",
+                )}
+            </p>
+          </div>
+
+          {/* Key Findings */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">3. Key Findings</h2>
+            <div className="space-y-4 pl-4">
+              <div>
+                <p className="font-bold text-sm mb-2">3.1 Performance Metrics</p>
+                <p className="text-sm text-justify leading-relaxed">
+                  {getToneContent(
+                    "Analysis reveals a 15% improvement in operational efficiency compared to the previous period. Key performance indicators demonstrate consistent positive trends across all major business units.",
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="font-bold text-sm mb-2">3.2 Market Analysis</p>
+                <p className="text-sm text-justify leading-relaxed">
+                  {getToneContent(
+                    "Market conditions remain favorable with sustained demand growth of 12%. Competitive positioning has strengthened, with market share increasing by 3 percentage points.",
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="font-bold text-sm mb-2">3.3 Customer Insights</p>
+                <p className="text-sm text-justify leading-relaxed">
+                  {getToneContent(
+                    "Customer satisfaction scores reached 87%, representing the highest level in three years. Net Promoter Score improved by 8 points, indicating strong brand loyalty.",
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Conclusions */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">4. Conclusions</h2>
+            <p className="text-sm text-justify leading-relaxed">
+              {formData.conclusions ||
+                getToneContent(
+                  "The findings demonstrate robust organizational performance and positive market momentum. Strategic initiatives have yielded measurable results, positioning the organization for continued growth and market leadership.",
+                )}
+            </p>
+          </div>
+
+          {/* Recommendations */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">5. Recommendations</h2>
+            <ul className="list-decimal pl-6 text-sm space-y-2">
+              <li>
+                {getToneContent(
+                  "Continue investment in operational excellence initiatives to sustain efficiency gains",
+                )}
+              </li>
+              <li>{getToneContent("Expand market presence in high-growth segments identified in the analysis")}</li>
+              <li>{getToneContent("Enhance customer engagement programs to leverage positive satisfaction trends")}</li>
+              <li>{getToneContent("Monitor competitive landscape and adjust strategies proactively")}</li>
+            </ul>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Financial Statement") {
+      const companyName = formData.companyInfo?.name || "[Company Name]"
+      const reportingPeriod = formData.companyInfo?.reportingPeriod || "Q4 2025"
+      const date = formData.date || new Date().toLocaleDateString()
+
+      return (
+        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-6">
+            <h1 className="text-2xl font-bold uppercase">{companyName}</h1>
+            <p className="text-lg mt-2">Financial Statement</p>
+            <p className="text-sm mt-1">For the Period: {reportingPeriod}</p>
+            <p className="text-xs text-gray-600 mt-2">All amounts in USD</p>
+          </div>
+
+          {/* Balance Sheet */}
+          <div>
+            <h2 className="text-lg font-bold uppercase border-b border-gray-400 pb-2 mb-4">Balance Sheet</h2>
+
+            <div className="space-y-4">
+              {/* Assets */}
+              <div>
+                <p className="font-bold text-sm mb-2 bg-gray-200 p-2">ASSETS</p>
+                <table className="w-full text-sm">
+                  <tbody>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2">Cash and Cash Equivalents</td>
+                      <td className="text-right py-2">$2,500,000</td>
+                    </tr>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2">Accounts Receivable</td>
+                      <td className="text-right py-2">$1,800,000</td>
+                    </tr>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2">Inventory</td>
+                      <td className="text-right py-2">$950,000</td>
+                    </tr>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2">Property and Equipment</td>
+                      <td className="text-right py-2">$3,200,000</td>
+                    </tr>
+                    <tr className="border-b-2 border-black">
+                      <td className="py-2">Intangible Assets</td>
+                      <td className="text-right py-2">$1,500,000</td>
+                    </tr>
+                    <tr className="font-bold">
+                      <td className="py-2">Total Assets</td>
+                      <td className="text-right py-2">$9,950,000</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Liabilities */}
+              <div className="mt-6">
+                <p className="font-bold text-sm mb-2 bg-gray-200 p-2">LIABILITIES</p>
+                <table className="w-full text-sm">
+                  <tbody>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2">Accounts Payable</td>
+                      <td className="text-right py-2">$850,000</td>
+                    </tr>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2">Short-term Debt</td>
+                      <td className="text-right py-2">$1,200,000</td>
+                    </tr>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2">Long-term Debt</td>
+                      <td className="text-right py-2">$2,800,000</td>
+                    </tr>
+                    <tr className="border-b-2 border-black">
+                      <td className="py-2">Deferred Revenue</td>
+                      <td className="text-right py-2">$450,000</td>
+                    </tr>
+                    <tr className="font-bold">
+                      <td className="py-2">Total Liabilities</td>
+                      <td className="text-right py-2">$5,300,000</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Equity */}
+              <div className="mt-6">
+                <p className="font-bold text-sm mb-2 bg-gray-200 p-2">SHAREHOLDERS' EQUITY</p>
+                <table className="w-full text-sm">
+                  <tbody>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2">Common Stock</td>
+                      <td className="text-right py-2">$2,000,000</td>
+                    </tr>
+                    <tr className="border-b-2 border-black">
+                      <td className="py-2">Retained Earnings</td>
+                      <td className="text-right py-2">$2,650,000</td>
+                    </tr>
+                    <tr className="font-bold">
+                      <td className="py-2">Total Equity</td>
+                      <td className="text-right py-2">$4,650,000</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Income Statement */}
+          <div className="mt-8">
+            <h2 className="text-lg font-bold uppercase border-b border-gray-400 pb-2 mb-4">Income Statement</h2>
+
+            <table className="w-full text-sm">
+              <tbody>
+                <tr className="bg-gray-200">
+                  <td className="py-2 px-2 font-bold">REVENUE</td>
+                  <td className="text-right py-2 px-2"></td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 pl-6">Product Sales</td>
+                  <td className="text-right py-2">$4,500,000</td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 pl-6">Service Revenue</td>
+                  <td className="text-right py-2">$2,300,000</td>
+                </tr>
+                <tr className="border-b-2 border-gray-400 font-bold">
+                  <td className="py-2">Total Revenue</td>
+                  <td className="text-right py-2">$6,800,000</td>
+                </tr>
+
+                <tr className="bg-gray-200 mt-2">
+                  <td className="py-2 px-2 font-bold">EXPENSES</td>
+                  <td className="text-right py-2 px-2"></td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 pl-6">Cost of Goods Sold</td>
+                  <td className="text-right py-2">$2,800,000</td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 pl-6">Operating Expenses</td>
+                  <td className="text-right py-2">$1,900,000</td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 pl-6">Interest Expense</td>
+                  <td className="text-right py-2">$180,000</td>
+                </tr>
+                <tr className="border-b-2 border-gray-400 font-bold">
+                  <td className="py-2">Total Expenses</td>
+                  <td className="text-right py-2">$4,880,000</td>
+                </tr>
+
+                <tr className="border-b border-gray-300">
+                  <td className="py-2">Income Before Taxes</td>
+                  <td className="text-right py-2">$1,920,000</td>
+                </tr>
+                <tr className="border-b-2 border-black">
+                  <td className="py-2">Income Tax Expense</td>
+                  <td className="text-right py-2">$420,000</td>
+                </tr>
+                <tr className="font-bold text-lg">
+                  <td className="py-3">NET INCOME</td>
+                  <td className="text-right py-3">$1,500,000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Notes */}
+          <div className="text-xs text-gray-700 border-t border-gray-300 pt-4 mt-6">
+            <p className="font-bold mb-2">NOTES TO FINANCIAL STATEMENTS</p>
+            <p>
+              {formData.notes ||
+                "These financial statements have been prepared in accordance with Generally Accepted Accounting Principles (GAAP). All amounts are expressed in USD. The financial information presented has been reviewed by management and is complete and accurate to the best of our knowledge."}
+            </p>
+            <p className="mt-4">
+              <span className="font-bold">Prepared by:</span> {formData.preparer || "Chief Financial Officer"}
+            </p>
+            <p className="mt-1">
+              <span className="font-bold">Date:</span> {date}
+            </p>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
     } else if (documentType === "Other") {
       // Generic document for other types including custom "Other" types
       return (
@@ -1502,7 +2157,7 @@ export default function CreateDocumentPage() {
       }
     }
 
-    localStorage.setItem("modocs_documents", JSON.stringify(docs))
+    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
     window.dispatchEvent(new Event("storage"))
     setHasUnsavedChanges(false)
     setShowSuccessMessage(true)
