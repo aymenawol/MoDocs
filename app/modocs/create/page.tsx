@@ -170,19 +170,19 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-black">
                 <td className="py-3">Professional Services - Month 1</td>
                 <td className="text-right py-3">1</td>
                 <td className="text-right py-3">$2,500.00</td>
                 <td className="text-right py-3">$2,500.00</td>
               </tr>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-black">
                 <td className="py-3">Consulting Hours (20 hrs @ $150/hr)</td>
                 <td className="text-right py-3">20</td>
                 <td className="text-right py-3">$150.00</td>
                 <td className="text-right py-3">$3,000.00</td>
               </tr>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-black">
                 <td className="py-3">Project Management</td>
                 <td className="text-right py-3">1</td>
                 <td className="text-right py-3">$1,250.00</td>
@@ -194,11 +194,11 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           {/* Totals */}
           <div className="flex justify-end">
             <div className="w-64 space-y-2 text-sm">
-              <div className="flex justify-between border-b border-gray-300 pb-2">
+              <div className="flex justify-between border-b border-black pb-2">
                 <span>Subtotal:</span>
                 <span>$6,750.00</span>
               </div>
-              <div className="flex justify-between border-b border-gray-300 pb-2">
+              <div className="flex justify-between border-b border-black pb-2">
                 <span>Tax (8%):</span>
                 <span>$540.00</span>
               </div>
@@ -210,7 +210,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Payment Terms */}
-          <div className="text-xs text-gray-700 border-t border-gray-300 pt-4">
+          <div className="text-xs text-black border-t border-black pt-4">
             <p className="font-bold mb-1">PAYMENT TERMS</p>
             <p>
               {tone === "formal"
@@ -463,7 +463,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Memo Header Fields */}
-          <div className="space-y-2 border-b border-gray-400 pb-6 mb-6">
+          <div className="space-y-2 border-b border-black pb-6 mb-6">
             <div className="grid grid-cols-[100px_1fr]">
               <p className="font-bold">TO:</p>
               <p>{to}</p>
@@ -518,7 +518,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Footer */}
           {formData.cc && (
-            <div className="mt-8 text-sm border-t border-gray-300 pt-4">
+            <div className="mt-8 text-sm border-t border-black pt-4">
               <p>
                 <span className="font-bold">CC:</span> {formData.cc}
               </p>
@@ -546,7 +546,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Executive Summary */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Executive Summary</h2>
+            <h2 className="text-xl font-bold uppercase border-b border-black pb-2">Executive Summary</h2>
             <p className="text-sm text-justify leading-relaxed">
               {executiveSummary ||
                 getToneContent(
@@ -562,7 +562,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Scope of Work */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Scope of Work</h2>
+            <h2 className="text-xl font-bold uppercase border-b border-black pb-2">Scope of Work</h2>
             <p className="text-sm text-justify leading-relaxed">
               {scope ||
                 getToneContent(
@@ -597,7 +597,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Methodology */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Our Methodology</h2>
+            <h2 className="text-xl font-bold uppercase border-b border-black pb-2">Our Methodology</h2>
             <p className="text-sm text-justify leading-relaxed">
               {getToneContent(
                 "We employ a proven, agile methodology that ensures transparency, collaboration, and adaptability throughout the project lifecycle. Our approach includes regular stakeholder engagement and iterative delivery.",
@@ -607,7 +607,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Timeline */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Timeline</h2>
+            <h2 className="text-xl font-bold uppercase border-b border-black pb-2">Timeline</h2>
             <p className="text-sm">{timeline || "Project Duration: 12-16 weeks with the following key milestones:"}</p>
             <div className="text-sm space-y-1 pl-6">
               <p>
@@ -627,15 +627,15 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Investment */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Investment</h2>
-            <div className="bg-gray-100 p-6 border border-gray-400">
+            <h2 className="text-xl font-bold uppercase border-b border-black pb-2">Investment</h2>
+            <div className="border-2 border-black p-6">
               <p className="text-2xl font-bold mb-3">Total Investment: ${budget}</p>
-              <p className="text-sm text-gray-700 mb-2">
+              <p className="text-sm text-black mb-2">
                 {getToneContent(
                   "This investment includes all phases of the project as outlined above. Payment terms are structured to align with project milestones.",
                 )}
               </p>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-black">
                 <span className="font-bold">Payment Structure:</span> 30% upon signing, 40% at mid-point, 30% upon
                 completion
               </p>
@@ -644,7 +644,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Next Steps */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b border-gray-400 pb-2">Next Steps</h2>
+            <h2 className="text-xl font-bold uppercase border-b border-black pb-2">Next Steps</h2>
             <p className="text-sm text-justify leading-relaxed">
               {getToneContent(
                 "We are excited about the opportunity to partner with your organization. To proceed, we propose scheduling a meeting to discuss this proposal in detail and address any questions you may have.",
@@ -677,7 +677,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Transaction Details */}
-          <div className="space-y-2 text-sm mb-6 border-y border-gray-300 py-4">
+          <div className="space-y-2 text-sm mb-6 border-y border-black py-4">
             <div className="flex justify-between">
               <span className="font-bold">Date:</span>
               <span>{date}</span>
@@ -702,7 +702,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-black">
                 <td className="py-2">{formData.itemDescription || "Professional Services"}</td>
                 <td className="text-center py-2">{formData.quantity || 1}</td>
                 <td className="text-right py-2">${amount}</td>
@@ -716,11 +716,11 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <span>TOTAL PAID:</span>
               <span>${amount}</span>
             </div>
-            <p className="text-xs text-gray-600 text-center">All amounts in USD</p>
+            <p className="text-xs text-black text-center">All amounts in USD</p>
           </div>
 
           {/* Footer */}
-          <div className="text-center text-sm text-gray-600 mt-8 border-t border-gray-300 pt-4">
+          <div className="text-center text-sm text-black mt-8 border-t border-black pt-4">
             <p className="font-semibold mb-1">
               {tone === "formal"
                 ? "We acknowledge receipt of payment"
@@ -751,13 +751,17 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           {/* Buyer/Supplier Section */}
           <div className="grid grid-cols-2 gap-8">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider mb-2 bg-gray-200 p-2">Buyer Information:</p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2 border-b border-black p-2">
+                Buyer Information:
+              </p>
               <p className="font-semibold">{buyerCompany}</p>
               <p className="text-sm">{formData.buyerInfo?.address || "123 Buyer Street, City, ST 12345"}</p>
               <p className="text-sm">{formData.buyerInfo?.contact || "Contact: John Doe, Procurement"}</p>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider mb-2 bg-gray-200 p-2">Supplier Information:</p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2 border-b border-black p-2">
+                Supplier Information:
+              </p>
               <p className="font-semibold">{supplierCompany}</p>
               <p className="text-sm">{formData.supplierInfo?.address || "456 Supplier Ave, City, ST 54321"}</p>
               <p className="text-sm">{formData.supplierInfo?.contact || "Contact: Jane Smith, Sales"}</p>
@@ -765,7 +769,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Order Details */}
-          <div className="grid grid-cols-3 gap-8 text-sm border-y border-gray-300 py-4">
+          <div className="grid grid-cols-3 gap-8 text-sm border-y border-black py-4">
             <div>
               <p className="font-bold">PO Date:</p>
               <p>{poDate}</p>
@@ -783,7 +787,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           {/* Line Items Table */}
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b-2 border-black bg-gray-100">
+              <tr className="border-b-2 border-black">
                 <th className="text-left py-2 px-2 font-bold">Item</th>
                 <th className="text-left py-2 px-2 font-bold">Description</th>
                 <th className="text-center py-2 px-2 font-bold">Qty</th>
@@ -792,21 +796,21 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-black">
                 <td className="py-3 px-2">1</td>
                 <td className="py-3 px-2">Office Chairs - Ergonomic Model X200</td>
                 <td className="text-center py-3 px-2">25</td>
                 <td className="text-right py-3 px-2">$350.00</td>
                 <td className="text-right py-3 px-2">$8,750.00</td>
               </tr>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-black">
                 <td className="py-3 px-2">2</td>
                 <td className="py-3 px-2">Standing Desks - Professional Series</td>
                 <td className="text-center py-3 px-2">15</td>
                 <td className="text-right py-3 px-2">$800.00</td>
                 <td className="text-right py-3 px-2">$12,000.00</td>
               </tr>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-black">
                 <td className="py-3 px-2">3</td>
                 <td className="py-3 px-2">Monitor Arms - Dual Mount</td>
                 <td className="text-center py-3 px-2">30</td>
@@ -827,9 +831,9 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Special Instructions */}
-          <div className="text-sm border-t border-gray-300 pt-4">
+          <div className="text-sm border-t border-black pt-4">
             <p className="font-bold mb-2">SPECIAL INSTRUCTIONS:</p>
-            <p className="text-gray-700">
+            <p className="text-black">
               {formData.specialInstructions ||
                 getToneContent(
                   "Please deliver items to the main warehouse loading dock between 8 AM - 4 PM. Contact receiving department 24 hours prior to delivery.",
@@ -979,7 +983,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Executive Summary */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">Executive Summary</h2>
+            <h2 className="text-xl font-bold uppercase border-b-2 border-black pb-2">Executive Summary</h2>
             <p className="text-sm text-justify leading-relaxed">
               {executiveSummary ||
                 getToneContent(
@@ -990,7 +994,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Introduction */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">1. Introduction</h2>
+            <h2 className="text-xl font-bold uppercase border-b-2 border-black pb-2">1. Introduction</h2>
             <p className="text-sm text-justify leading-relaxed">
               {formData.introduction ||
                 getToneContent(
@@ -1001,7 +1005,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Methodology */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">2. Methodology</h2>
+            <h2 className="text-xl font-bold uppercase border-b-2 border-black pb-2">2. Methodology</h2>
             <p className="text-sm text-justify leading-relaxed">
               {formData.methodology ||
                 getToneContent(
@@ -1012,7 +1016,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Key Findings */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">3. Key Findings</h2>
+            <h2 className="text-xl font-bold uppercase border-b-2 border-black pb-2">3. Key Findings</h2>
             <div className="space-y-4 pl-4">
               <div>
                 <p className="font-bold text-sm mb-2">3.1 Performance Metrics</p>
@@ -1043,7 +1047,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Conclusions */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">4. Conclusions</h2>
+            <h2 className="text-xl font-bold uppercase border-b-2 border-black pb-2">4. Conclusions</h2>
             <p className="text-sm text-justify leading-relaxed">
               {formData.conclusions ||
                 getToneContent(
@@ -1054,7 +1058,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Recommendations */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold uppercase border-b-2 border-gray-400 pb-2">5. Recommendations</h2>
+            <h2 className="text-xl font-bold uppercase border-b-2 border-black pb-2">5. Recommendations</h2>
             <ul className="list-decimal pl-6 text-sm space-y-2">
               <li>
                 {getToneContent(
@@ -1080,32 +1084,32 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-2xl font-bold uppercase">{companyName}</h1>
             <p className="text-lg mt-2">Financial Statement</p>
             <p className="text-sm mt-1">For the Period: {reportingPeriod}</p>
-            <p className="text-xs text-gray-600 mt-2">All amounts in USD</p>
+            <p className="text-xs text-black mt-2">All amounts in USD</p>
           </div>
 
           {/* Balance Sheet */}
           <div>
-            <h2 className="text-lg font-bold uppercase border-b border-gray-400 pb-2 mb-4">Balance Sheet</h2>
+            <h2 className="text-lg font-bold uppercase border-b border-black pb-2 mb-4">Balance Sheet</h2>
 
             <div className="space-y-4">
               {/* Assets */}
               <div>
-                <p className="font-bold text-sm mb-2 bg-gray-200 p-2">ASSETS</p>
+                <p className="font-bold text-sm mb-2 border-b border-black p-2">ASSETS</p>
                 <table className="w-full text-sm">
                   <tbody>
-                    <tr className="border-b border-gray-300">
+                    <tr className="border-b border-black">
                       <td className="py-2">Cash and Cash Equivalents</td>
                       <td className="text-right py-2">$2,500,000</td>
                     </tr>
-                    <tr className="border-b border-gray-300">
+                    <tr className="border-b border-black">
                       <td className="py-2">Accounts Receivable</td>
                       <td className="text-right py-2">$1,800,000</td>
                     </tr>
-                    <tr className="border-b border-gray-300">
+                    <tr className="border-b border-black">
                       <td className="py-2">Inventory</td>
                       <td className="text-right py-2">$950,000</td>
                     </tr>
-                    <tr className="border-b border-gray-300">
+                    <tr className="border-b border-black">
                       <td className="py-2">Property and Equipment</td>
                       <td className="text-right py-2">$3,200,000</td>
                     </tr>
@@ -1123,18 +1127,18 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
               {/* Liabilities */}
               <div className="mt-6">
-                <p className="font-bold text-sm mb-2 bg-gray-200 p-2">LIABILITIES</p>
+                <p className="font-bold text-sm mb-2 border-b border-black p-2">LIABILITIES</p>
                 <table className="w-full text-sm">
                   <tbody>
-                    <tr className="border-b border-gray-300">
+                    <tr className="border-b border-black">
                       <td className="py-2">Accounts Payable</td>
                       <td className="text-right py-2">$850,000</td>
                     </tr>
-                    <tr className="border-b border-gray-300">
+                    <tr className="border-b border-black">
                       <td className="py-2">Short-term Debt</td>
                       <td className="text-right py-2">$1,200,000</td>
                     </tr>
-                    <tr className="border-b border-gray-300">
+                    <tr className="border-b border-black">
                       <td className="py-2">Long-term Debt</td>
                       <td className="text-right py-2">$2,800,000</td>
                     </tr>
@@ -1152,10 +1156,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
               {/* Equity */}
               <div className="mt-6">
-                <p className="font-bold text-sm mb-2 bg-gray-200 p-2">SHAREHOLDERS' EQUITY</p>
+                <p className="font-bold text-sm mb-2 border-b border-black p-2">SHAREHOLDERS' EQUITY</p>
                 <table className="w-full text-sm">
                   <tbody>
-                    <tr className="border-b border-gray-300">
+                    <tr className="border-b border-black">
                       <td className="py-2">Common Stock</td>
                       <td className="text-right py-2">$2,000,000</td>
                     </tr>
@@ -1175,49 +1179,49 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Income Statement */}
           <div className="mt-8">
-            <h2 className="text-lg font-bold uppercase border-b border-gray-400 pb-2 mb-4">Income Statement</h2>
+            <h2 className="text-lg font-bold uppercase border-b border-black pb-2 mb-4">Income Statement</h2>
 
             <table className="w-full text-sm">
               <tbody>
-                <tr className="bg-gray-200">
+                <tr className="border-b border-black">
                   <td className="py-2 px-2 font-bold">REVENUE</td>
                   <td className="text-right py-2 px-2"></td>
                 </tr>
-                <tr className="border-b border-gray-300">
+                <tr className="border-b border-black">
                   <td className="py-2 pl-6">Product Sales</td>
                   <td className="text-right py-2">$4,500,000</td>
                 </tr>
-                <tr className="border-b border-gray-300">
+                <tr className="border-b border-black">
                   <td className="py-2 pl-6">Service Revenue</td>
                   <td className="text-right py-2">$2,300,000</td>
                 </tr>
-                <tr className="border-b-2 border-gray-400 font-bold">
+                <tr className="border-b-2 border-black font-bold">
                   <td className="py-2">Total Revenue</td>
                   <td className="text-right py-2">$6,800,000</td>
                 </tr>
 
-                <tr className="bg-gray-200 mt-2">
+                <tr className="border-b border-black mt-2">
                   <td className="py-2 px-2 font-bold">EXPENSES</td>
                   <td className="text-right py-2 px-2"></td>
                 </tr>
-                <tr className="border-b border-gray-300">
+                <tr className="border-b border-black">
                   <td className="py-2 pl-6">Cost of Goods Sold</td>
                   <td className="text-right py-2">$2,800,000</td>
                 </tr>
-                <tr className="border-b border-gray-300">
+                <tr className="border-b border-black">
                   <td className="py-2 pl-6">Operating Expenses</td>
                   <td className="text-right py-2">$1,900,000</td>
                 </tr>
-                <tr className="border-b border-gray-300">
+                <tr className="border-b border-black">
                   <td className="py-2 pl-6">Interest Expense</td>
                   <td className="text-right py-2">$180,000</td>
                 </tr>
-                <tr className="border-b-2 border-gray-400 font-bold">
+                <tr className="border-b-2 border-black font-bold">
                   <td className="py-2">Total Expenses</td>
                   <td className="text-right py-2">$4,880,000</td>
                 </tr>
 
-                <tr className="border-b border-gray-300">
+                <tr className="border-b border-black">
                   <td className="py-2">Income Before Taxes</td>
                   <td className="text-right py-2">$1,920,000</td>
                 </tr>
@@ -1234,7 +1238,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Notes */}
-          <div className="text-xs text-gray-700 border-t border-gray-300 pt-4 mt-6">
+          <div className="text-xs text-black border-t border-black pt-4 mt-6">
             <p className="font-bold mb-2">NOTES TO FINANCIAL STATEMENTS</p>
             <p>
               {formData.notes ||
@@ -1246,6 +1250,143 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="mt-1">
               <span className="font-bold">Date:</span> {date}
             </p>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
           </div>
         </div>
       )
