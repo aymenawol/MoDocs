@@ -1593,9 +1593,13 @@ export default function CreateDocumentPage() {
 
       // Capture the element as canvas with higher quality
       const canvas = await html2canvas(element, {
+        scale: 3, // Increase resolution (3x the default)
         useCORS: true,
+        allowTaint: true,
         logging: false,
         backgroundColor: "#ffffff",
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
       } as any)
 
       // Calculate dimensions for A4 page
@@ -1609,15 +1613,15 @@ export default function CreateDocumentPage() {
       let position = 0
 
       // Add image to PDF (handle multiple pages if needed)
-      const imgData = canvas.toDataURL("image/png")
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+      const imgData = canvas.toDataURL("image/jpeg", 1.0)
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight, undefined, "FAST")
       heightLeft -= pageHeight
 
       // Add additional pages if content is longer than one page
       while (heightLeft > 0) {
         position = heightLeft - imgHeight
         pdf.addPage()
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight, undefined, "FAST")
         heightLeft -= pageHeight
       }
 
