@@ -1144,6 +1144,143 @@ function DocumentPreview({ formData, documentType, documentTitle, tone, customDo
           </div>
         </div>
       )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType === "Other" ? customDocumentType : documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
     } else {
       // Generic document for other types including custom "Other" types
       return (
@@ -1330,21 +1467,7 @@ export default function CreateDocumentPage() {
   const documentTypeRef = useRef(documentType)
   const hasUnsavedChangesRef = useRef(hasUnsavedChanges)
 
-  useEffect(() => {
-    formDataRef.current = formData
-  }, [formData])
-
-  useEffect(() => {
-    documentTitleRef.current = documentTitle
-  }, [documentTitle])
-
-  useEffect(() => {
-    documentTypeRef.current = documentType
-  }, [documentType])
-
-  useEffect(() => {
-    hasUnsavedChangesRef.current = hasUnsavedChanges
-  }, [hasUnsavedChanges])
+  // Instead, refs will be updated directly when state changes in event handlers
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -1374,23 +1497,33 @@ export default function CreateDocumentPage() {
     const effectiveType = isCustomType ? "Other" : (doc.documentType as DocumentType | "Other")
 
     setDocumentType(effectiveType)
+    documentTypeRef.current = effectiveType
 
     if (isCustomType) {
-      setCustomDocumentType(doc.customDocumentType || doc.documentType || "")
+      const customType = doc.customDocumentType || doc.documentType || ""
+      setCustomDocumentType(customType)
     } else if (doc.documentType === "Other") {
-      setCustomDocumentType(doc.customDocumentType || "")
+      const customType = doc.customDocumentType || ""
+      setCustomDocumentType(customType)
     } else {
       setCustomDocumentType("")
     }
-    setDocumentTitle(doc.title || "")
+
+    const title = doc.title || ""
+    setDocumentTitle(title)
+    documentTitleRef.current = title
+
     setTone(doc.tone || "professional")
     setFormData(resolvedFormData)
+    formDataRef.current = resolvedFormData
+
     setEditingDocId(doc.id)
 
     if (previewId) {
       setCurrentStep(4)
       setShowPreview(true)
       setHasUnsavedChanges(false)
+      hasUnsavedChangesRef.current = false
     } else {
       setCurrentStep(3)
       setShowPreview(false)
@@ -1405,22 +1538,33 @@ export default function CreateDocumentPage() {
       const effectiveType = isCustomType ? "Other" : (doc.documentType as DocumentType | "Other")
 
       setDocumentType(effectiveType)
+      documentTypeRef.current = effectiveType
 
       if (isCustomType) {
-        setCustomDocumentType(doc.customDocumentType || doc.documentType || "")
+        const customType = doc.customDocumentType || doc.documentType || ""
+        setCustomDocumentType(customType)
       } else if (doc.documentType === "Other") {
-        setCustomDocumentType(doc.customDocumentType || "")
+        const customType = doc.customDocumentType || ""
+        setCustomDocumentType(customType)
       } else {
         setCustomDocumentType("")
       }
-      setDocumentTitle(doc.title || "")
+
+      const title = doc.title || ""
+      setDocumentTitle(title)
+      documentTitleRef.current = title
+
       setTone(doc.tone || "professional")
-      setFormData({
+
+      const resolvedFormData = {
         ...(doc.formData || doc),
         id: doc.id,
         createdAt: doc.createdAt,
         status: doc.status,
-      })
+      }
+      setFormData(resolvedFormData)
+      formDataRef.current = resolvedFormData
+
       setEditingDocId(doc.id)
       setCurrentStep(3)
       sessionStorage.removeItem("modocs_edit_document")
@@ -1496,6 +1640,7 @@ export default function CreateDocumentPage() {
 
   const handleDocumentTypeChange = (type: DocumentType | "Other") => {
     setDocumentType(type)
+    documentTypeRef.current = type
     setErrors({}) // Clear errors when type changes
     setFormData((prev: any) => ({
       ...prev,
@@ -1507,6 +1652,8 @@ export default function CreateDocumentPage() {
       status: "In Progress", // Set initial status
       tone,
     }))
+    formDataRef.current = { ...formData, documentType: type }
+
     // If custom type is selected, clear it if it's not 'Other'
     if (type !== "Other") {
       setCustomDocumentType("")
@@ -1608,6 +1755,7 @@ export default function CreateDocumentPage() {
     setCurrentStep(4)
     setShowPreview(true)
     setHasUnsavedChanges(true)
+    hasUnsavedChangesRef.current = true
 
     const timestamp = new Date().toISOString()
     const finalDocumentType = documentType === "Other" ? customDocumentType : documentType
@@ -1645,6 +1793,8 @@ export default function CreateDocumentPage() {
       ...prev,
       [field]: value,
     }))
+    formDataRef.current = { ...formDataRef.current, [field]: value }
+
     // Clear specific error if field is corrected
     if (errors[field]) {
       setErrors((prev) => {
@@ -1654,6 +1804,7 @@ export default function CreateDocumentPage() {
       })
     }
     setHasUnsavedChanges(true)
+    hasUnsavedChangesRef.current = true
   }
 
   const handleNestedInputChange = (path: string[], value: any) => {
@@ -1667,6 +1818,8 @@ export default function CreateDocumentPage() {
       current[path[path.length - 1]] = value
       return newData
     })
+    formDataRef.current = { ...formDataRef.current } // Shallow copy to trigger update
+
     const errorKey = path.join(".")
     // Clear specific error if field is corrected
     if (errors[errorKey]) {
@@ -1677,6 +1830,7 @@ export default function CreateDocumentPage() {
       })
     }
     setHasUnsavedChanges(true)
+    hasUnsavedChangesRef.current = true
   }
 
   const validateForm = (): boolean => {
@@ -1779,6 +1933,7 @@ export default function CreateDocumentPage() {
     localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
     window.dispatchEvent(new Event("storage"))
     setHasUnsavedChanges(false)
+    hasUnsavedChangesRef.current = false
     setShowSuccessMessage(true)
   }
 
@@ -2172,6 +2327,9 @@ export default function CreateDocumentPage() {
                         value={customDocumentType}
                         onChange={(e) => {
                           setCustomDocumentType(e.target.value)
+                          documentTypeRef.current = "Other" // Ensure type is 'Other' if custom is used
+                          formDataRef.current = { ...formDataRef.current, customDocumentType: e.target.value }
+
                           if (errors.customDocumentType) {
                             setErrors((prev) => {
                               const newErrors = { ...prev }
@@ -2215,6 +2373,7 @@ export default function CreateDocumentPage() {
                         onClick={() => {
                           setTone(option.value as any)
                           setHasUnsavedChanges(true)
+                          hasUnsavedChangesRef.current = true
                         }}
                         className={`p-4 border-2 transition-all hover:border-primary/50 rounded-lg text-center ${
                           tone === option.value ? "border-primary bg-primary/5" : "border-border bg-card"
@@ -2241,6 +2400,8 @@ export default function CreateDocumentPage() {
                       value={documentTitle}
                       onChange={(e) => {
                         setDocumentTitle(e.target.value)
+                        documentTitleRef.current = e.target.value
+
                         if (errors.documentTitle) {
                           setErrors((prev) => {
                             const newErrors = { ...prev }
@@ -2249,6 +2410,7 @@ export default function CreateDocumentPage() {
                           })
                         }
                         setHasUnsavedChanges(true)
+                        hasUnsavedChangesRef.current = true
                       }}
                       placeholder="e.g., Q4 2024 Consulting Agreement"
                       className={errors.documentTitle ? "border-destructive" : ""}
