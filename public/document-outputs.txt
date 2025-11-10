@@ -1,0 +1,3 @@
+// MoDocs Document Outputs Log
+// This file stores all JSON outputs from document creation
+// Each entry is a complete document object with metadata

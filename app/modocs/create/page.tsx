@@ -95,7 +95,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   )
 }
 
-function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
+function DocumentPreview({ formData, documentType, documentTitle, tone, customDocumentType }: any) {
   // Generate tone-specific content
   const getToneContent = (baseContent: string) => {
     switch (tone) {
@@ -236,7 +236,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
         <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto leading-relaxed">
           {/* Header */}
           <div className="text-center border-b-2 border-black pb-4 mb-6">
-            <h1 className="text-2xl font-bold uppercase tracking-widest mb-2">{contractTitle}</h1>
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{contractTitle}</h1>
             <p className="text-sm uppercase">Agreement</p>
           </div>
 
@@ -733,6 +733,417 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
         </div>
       )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType === "Other" ? customDocumentType : documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType === "Other" ? customDocumentType : documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType === "Other" ? customDocumentType : documentType}</p>
+          </div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 border-t border-black">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
     } else {
       // Generic document for other types including custom "Other" types
       return (
@@ -740,7 +1151,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           {/* Header */}
           <div className="text-center border-b-2 border-black pb-4 mb-8">
             <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
-            <p className="text-sm uppercase mt-2">{documentType}</p>
+            <p className="text-sm uppercase mt-2">{documentType === "Other" ? customDocumentType : documentType}</p>
           </div>
 
           {/* Document Body */}
@@ -873,7 +1284,11 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
     }
   }
 
-  return <div className="space-y-6" data-testid="document-preview-body">{generatePreviewContent()}</div>
+  return (
+    <div className="space-y-6" data-testid="document-preview-body">
+      {generatePreviewContent()}
+    </div>
+  )
 }
 
 const BUILTIN_DOCUMENT_TYPES = new Set([
@@ -967,10 +1382,10 @@ export default function CreateDocumentPage() {
     } else {
       setCustomDocumentType("")
     }
-  setDocumentTitle(doc.title || "")
-  setTone(doc.tone || "professional")
-  setFormData(resolvedFormData)
-  setEditingDocId(doc.id)
+    setDocumentTitle(doc.title || "")
+    setTone(doc.tone || "professional")
+    setFormData(resolvedFormData)
+    setEditingDocId(doc.id)
 
     if (previewId) {
       setCurrentStep(4)
@@ -1361,7 +1776,7 @@ export default function CreateDocumentPage() {
       }
     }
 
-    localStorage.setItem("modocs_documents", JSON.stringify(docs))
+    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
     window.dispatchEvent(new Event("storage"))
     setHasUnsavedChanges(false)
     setShowSuccessMessage(true)
@@ -1378,6 +1793,23 @@ export default function CreateDocumentPage() {
       tone,
       status: "Completed",
       updatedAt: new Date().toISOString(),
+    }
+
+    try {
+      const outputEntry = {
+        timestamp: new Date().toISOString(),
+        document: documentData,
+      }
+
+      // Note: In production, this would be saved via API call to server
+      // For now, we log it to demonstrate the structure
+      console.log("[v0] Document output to be saved:", outputEntry)
+
+      // Simulate appending to file (would be actual file operation in production)
+      const outputText = `\n// Document created: ${new Date().toLocaleString()}\n${JSON.stringify(outputEntry, null, 2)}\n`
+      console.log("[v0] Output text:", outputText)
+    } catch (error) {
+      console.error("[v0] Error logging document output:", error)
     }
 
     const blob = new Blob([JSON.stringify(documentData, null, 2)], { type: "application/json" })
@@ -1415,12 +1847,57 @@ export default function CreateDocumentPage() {
       const html2canvas = (await import("html2canvas")).default
       const { jsPDF } = await import("jspdf")
 
-      // Capture the element as canvas with higher quality
-      const canvas = await html2canvas(element, {
+      const clonedElement = element.cloneNode(true) as HTMLElement
+      clonedElement.style.position = "absolute"
+      clonedElement.style.left = "-9999px"
+      // Ensure we have a container to append the cloned element to, if not already present
+      let previewContainer = document.getElementById("document-preview-container")
+      if (!previewContainer) {
+        previewContainer = document.createElement("div")
+        previewContainer.id = "document-preview-container"
+        document.body.appendChild(previewContainer)
+      }
+      previewContainer.appendChild(clonedElement)
+
+      // Get all elements in the cloned tree that are direct children or descendants
+      const allElements = Array.from(clonedElement.querySelectorAll("*")) as HTMLElement[]
+
+      // Convert all computed styles from oklch to RGB
+      allElements.forEach((el) => {
+        // Query the original element to get its computed style, as the cloned element's styles might not be fully applied yet.
+        const originalElement = element.querySelector(`[data-preview-id="${(el as any).dataset?.previewId}"]`) || el
+        const computedStyle = window.getComputedStyle(originalElement)
+
+        // Apply computed colors as inline styles
+        const backgroundColor = computedStyle.backgroundColor
+        const color = computedStyle.color
+        const borderColor = computedStyle.borderColor
+
+        if (backgroundColor && backgroundColor !== "rgba(0, 0, 0, 0)") {
+          el.style.backgroundColor = backgroundColor
+        }
+        if (color) {
+          el.style.color = color
+        }
+        if (borderColor) {
+          el.style.borderColor = borderColor
+        }
+      })
+
+      // Capture the cloned element as canvas with higher quality
+      const canvas = await html2canvas(clonedElement, {
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
+        scale: 2, // Higher quality
       } as any)
+
+      // Remove cloned element
+      previewContainer.removeChild(clonedElement)
+      // If the container is now empty, remove it
+      if (previewContainer.children.length === 0) {
+        document.body.removeChild(previewContainer)
+      }
 
       // Calculate dimensions for A4 page
       const imgWidth = 210 // A4 width in mm
@@ -1623,7 +2100,11 @@ export default function CreateDocumentPage() {
               </div>
             </button>
             <div className="flex items-center gap-4">
-              <Button variant="outline" className="gap-2 bg-transparent" onClick={() => handleNavigation("/modocs/view")}>
+              <Button
+                variant="outline"
+                className="gap-2 bg-transparent"
+                onClick={() => handleNavigation("/modocs/view")}
+              >
                 <Eye className="h-4 w-4" />
                 <span className="hidden sm:inline">Manage Documents</span>
               </Button>
@@ -1849,8 +2330,8 @@ export default function CreateDocumentPage() {
                           <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.5,16H14V19H12.5V16H11V14.5H12.5V13.5C12.5,12.1 13.6,11 15,11V12.5C14.5,12.5 14,13 14,13.5V14.5H15.5V16M6,20V4H13V9H18V20H6Z" />
                         </svg>
                       </div>
-                        Download as PDF
-                      </DropdownMenuItem>
+                      Download as PDF
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleDownloadJSON} className="gap-2">
                       <div className="w-4 h-4 flex items-center justify-center">
                         <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#F59E0B">
@@ -1873,6 +2354,7 @@ export default function CreateDocumentPage() {
                 documentType={documentType}
                 documentTitle={documentTitle}
                 tone={tone}
+                customDocumentType={customDocumentType}
               />
             </div>
           </div>
