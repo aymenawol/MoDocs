@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
-import puppeteer from "puppeteer"
+import chromium from "@sparticuz/chromium"
+
+// Dynamically import puppeteer based on environment
+const getPuppeteer = async () => {
+  if (process.env.VERCEL === "1") {
+    // Use puppeteer-core on Vercel
+    return (await import("puppeteer-core")).default
+  } else {
+    // Use regular puppeteer locally
+    return (await import("puppeteer")).default
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,10 +20,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "HTML content is required" }, { status: 400 })
     }
 
-    // Launch Puppeteer browser
+    const puppeteer = await getPuppeteer()
+    const isVercel = process.env.VERCEL === "1"
+
+    // Launch Puppeteer browser with appropriate configuration
     const browser = await puppeteer.launch({
-      headless: true,
-      args: [
+      args: isVercel ? [
+        ...chromium.args,
+        "--hide-scrollbars",
+        "--disable-web-security",
+      ] : [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
@@ -20,16 +37,18 @@ export async function POST(request: NextRequest) {
         "--no-first-run",
         "--no-zygote",
       ],
+      defaultViewport: {
+        width: 1200,
+        height: 1600,
+        deviceScaleFactor: 2,
+      },
+      executablePath: isVercel 
+        ? await chromium.executablePath() 
+        : undefined, // Let puppeteer find Chrome locally
+      headless: true,
     })
 
     const page = await browser.newPage()
-
-    // Set viewport for consistent rendering
-    await page.setViewport({
-      width: 1200,
-      height: 1600,
-      deviceScaleFactor: 2,
-    })
 
     try {
       // Set the HTML content and wait for everything to load
@@ -47,13 +66,15 @@ export async function POST(request: NextRequest) {
       }
 
       // Ensure web fonts are fully ready
-      await page.evaluate(() => {
-        const fonts = (document as any).fonts
-        if (fonts?.ready) {
-          return fonts.ready.catch(() => undefined)
-        }
-        return undefined
-      })
+      try {
+        await page.evaluate(`
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.catch(() => {});
+          }
+        `)
+      } catch {
+        // Font loading check failed, continue anyway
+      }
 
       // Generate PDF
       const pdf = await page.pdf({
