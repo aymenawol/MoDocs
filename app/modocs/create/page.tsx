@@ -123,12 +123,13 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
       const totalAmount = formData.totalAmount || "0.00"
 
       return (
-        <div className="space-y-8 bg-white p-12 text-black font-sans max-w-[8.5in] mx-auto">
-          {/* Letterhead */}
-          <div className="text-right border-b-2 border-black pb-4">
+        <div className="font-serif bg-white text-black p-8 max-w-4xl mx-auto space-y-6">
+          {/* Header with Title - replaced border-b-2 with div */}
+          <div className="text-right pb-4">
             <h1 className="text-3xl font-bold uppercase tracking-wide mb-1">Invoice</h1>
             <p className="text-sm">#{invoiceNumber}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* From/To Section */}
           <div className="grid grid-cols-2 gap-8">
@@ -159,34 +160,52 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             </div>
           </div>
 
-          {/* Line Items Table */}
+          {/* Line Items Table - replaced all border classes with div separators */}
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b-2 border-black">
+              <tr>
                 <th className="text-left py-2 font-bold">Description</th>
                 <th className="text-right py-2 font-bold">Qty</th>
                 <th className="text-right py-2 font-bold">Rate</th>
                 <th className="text-right py-2 font-bold">Amount</th>
               </tr>
             </thead>
+          </table>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
+          <table className="w-full border-collapse text-sm">
             <tbody>
-              <tr className="border-b border-black">
+              <tr>
                 <td className="py-3">Professional Services - Month 1</td>
                 <td className="text-right py-3">1</td>
                 <td className="text-right py-3">$2,500.00</td>
                 <td className="text-right py-3">$2,500.00</td>
               </tr>
-              <tr className="border-b border-black">
+              <tr>
+                <td colSpan={4}>
+                  <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+                </td>
+              </tr>
+              <tr>
                 <td className="py-3">Consulting Hours (20 hrs @ $150/hr)</td>
                 <td className="text-right py-3">20</td>
                 <td className="text-right py-3">$150.00</td>
                 <td className="text-right py-3">$3,000.00</td>
               </tr>
-              <tr className="border-b border-black">
+              <tr>
+                <td colSpan={4}>
+                  <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+                </td>
+              </tr>
+              <tr>
                 <td className="py-3">Project Management</td>
                 <td className="text-right py-3">1</td>
                 <td className="text-right py-3">$1,250.00</td>
                 <td className="text-right py-3">$1,250.00</td>
+              </tr>
+              <tr>
+                <td colSpan={4}>
+                  <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -194,15 +213,18 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           {/* Totals */}
           <div className="flex justify-end">
             <div className="w-64 space-y-2 text-sm">
-              <div className="flex justify-between border-b border-black pb-2">
+              <div className="flex justify-between pb-2">
                 <span>Subtotal:</span>
                 <span>$6,750.00</span>
               </div>
-              <div className="flex justify-between border-b border-black pb-2">
+              <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+              <div className="flex justify-between pb-2">
                 <span>Tax (8%):</span>
                 <span>$540.00</span>
               </div>
-              <div className="flex justify-between border-t-2 border-black pt-2 font-bold text-lg">
+              <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+              <div style={{ height: "2px", background: "black", width: "100%", marginTop: "8px" }}></div>
+              <div className="flex justify-between pt-2 font-bold text-lg">
                 <span>TOTAL:</span>
                 <span>${totalAmount === "0.00" ? "7,290.00" : totalAmount}</span>
               </div>
@@ -210,7 +232,8 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Payment Terms */}
-          <div className="text-xs text-black border-t border-black pt-4">
+          <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+          <div className="text-xs text-black pt-4">
             <p className="font-bold mb-1">PAYMENT TERMS</p>
             <p>
               {tone === "formal"
@@ -231,14 +254,19 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
       const partyB = formData.partyB || "[Second Party Name]"
       const duration = formData.duration || "twelve (12) months"
       const paymentTerms = formData.paymentTerms || "as mutually agreed upon"
+      const contractNumber = formData.contractNumber || "C2025-001"
+      const contractType = formData.contractType || "Contract Agreement"
 
       return (
-        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto leading-relaxed">
+        <div className="font-serif bg-white text-black p-8 max-w-4xl mx-auto space-y-6">
           {/* Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-6">
-            <h1 className="text-2xl font-bold uppercase tracking-widest">{contractTitle}</h1>
-            <p className="text-sm uppercase">Agreement</p>
+          <div className="text-center pb-4">
+            <h1 className="text-3xl font-bold uppercase tracking-wide mb-2">
+              {contractType === "Service Agreement" ? "Service Agreement" : "Contract Agreement"}
+            </h1>
+            <p className="text-sm">Contract No. {contractNumber}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Parties Section */}
           <div className="space-y-3">
@@ -338,27 +366,27 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             </div>
           </div>
 
-          {/* Signatures */}
-          <div className="grid grid-cols-2 gap-12 pt-8 mt-8 border-t border-black">
+          {/* Signature Section */}
+          <div className="mt-12 grid grid-cols-2 gap-12">
             <div className="space-y-8">
               <div>
-                <div className="border-b border-black mb-2 h-10"></div>
+                <div style={{ height: "1px", background: "black", width: "100%", marginBottom: "40px" }}></div>
                 <p className="text-xs font-bold">{partyA}</p>
                 <p className="text-xs">First Party Signature</p>
               </div>
               <div>
-                <div className="border-b border-black mb-2"></div>
+                <div style={{ height: "1px", background: "black", width: "100%", marginBottom: "8px" }}></div>
                 <p className="text-xs">Date</p>
               </div>
             </div>
             <div className="space-y-8">
               <div>
-                <div className="border-b border-black mb-2 h-10"></div>
+                <div style={{ height: "1px", background: "black", width: "100%", marginBottom: "40px" }}></div>
                 <p className="text-xs font-bold">{partyB}</p>
                 <p className="text-xs">Second Party Signature</p>
               </div>
               <div>
-                <div className="border-b border-black mb-2"></div>
+                <div style={{ height: "1px", background: "black", width: "100%", marginBottom: "8px" }}></div>
                 <p className="text-xs">Date</p>
               </div>
             </div>
@@ -383,6 +411,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="text-sm">{formData.senderAddress?.split("\n")[3] || "Phone: (555) 123-4567"}</p>
             <p className="text-sm">{formData.senderAddress?.split("\n")[4] || "Email: info@yourcompany.com"}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Date */}
           <div className="mb-8">
@@ -397,11 +426,13 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="text-sm">{formData.recipientAddress?.split("\n")[1] || "456 Corporate Avenue"}</p>
             <p className="text-sm">{formData.recipientAddress?.split("\n")[2] || "City, State 12345"}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Subject */}
           <div className="mb-6">
             <p className="font-bold">Re: {subject}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Salutation */}
           <div className="mb-4">
@@ -409,7 +440,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           </div>
 
           {/* Body */}
-          <div className="space-y-4 text-justify leading-loose">
+          <div className="space-y-4 text-justify leading-relaxed">
             <p>
               {body ||
                 getToneContent(
@@ -427,6 +458,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Closing */}
           <div className="mt-8">
@@ -461,9 +493,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           <div className="border-b-2 border-black pb-2 mb-6">
             <h1 className="text-2xl font-bold uppercase">Memorandum</h1>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Memo Header Fields */}
-          <div className="space-y-2 border-b border-black pb-6 mb-6">
+          <div className="space-y-2 pb-6 mb-6">
             <div className="grid grid-cols-[100px_1fr]">
               <p className="font-bold">TO:</p>
               <p>{to}</p>
@@ -481,6 +514,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <p className="font-semibold">{subject}</p>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Body */}
           <div className="space-y-4 text-justify leading-relaxed">
@@ -518,7 +552,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
 
           {/* Footer */}
           {formData.cc && (
-            <div className="mt-8 text-sm border-t border-black pt-4">
+            <div className="mt-8 pt-4">
               <p>
                 <span className="font-bold">CC:</span> {formData.cc}
               </p>
@@ -543,6 +577,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="text-sm">Date: {new Date().toLocaleDateString()}</p>
             <p className="text-sm mt-4">Confidential & Proprietary</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Executive Summary */}
           <div className="space-y-3">
@@ -559,6 +594,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Scope of Work */}
           <div className="space-y-3">
@@ -594,6 +630,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </li>
             </ul>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Methodology */}
           <div className="space-y-3">
@@ -604,6 +641,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Timeline */}
           <div className="space-y-3">
@@ -624,6 +662,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </p>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Investment */}
           <div className="space-y-3">
@@ -641,6 +680,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </p>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Next Steps */}
           <div className="space-y-3">
@@ -666,6 +706,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-2xl font-bold uppercase tracking-wide">Receipt</h1>
             <p className="text-sm">#{receiptNumber}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Business Info */}
           <div className="text-center mb-6">
@@ -675,6 +716,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="text-sm">{formData.companyInfo?.phone || "Phone: (555) 123-4567"}</p>
             <p className="text-sm">{formData.companyInfo?.email || "Email: info@yourbusiness.com"}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Transaction Details */}
           <div className="space-y-2 text-sm mb-6 border-y border-black py-4">
@@ -691,6 +733,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <span>TXN-{Date.now().toString().slice(-8)}</span>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Items */}
           <table className="w-full text-sm mb-6">
@@ -709,6 +752,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </tr>
             </tbody>
           </table>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Total */}
           <div className="border-t-2 border-black pt-4">
@@ -718,9 +762,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             </div>
             <p className="text-xs text-black text-center">All amounts in USD</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Footer */}
-          <div className="text-center text-sm text-black mt-8 border-t border-black pt-4">
+          <div className="text-center text-sm text-black mt-8 pt-4">
             <p className="font-semibold mb-1">
               {tone === "formal"
                 ? "We acknowledge receipt of payment"
@@ -747,6 +792,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-3xl font-bold uppercase tracking-wide">Purchase Order</h1>
             <p className="text-sm mt-2">PO Number: {poNumber}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Buyer/Supplier Section */}
           <div className="grid grid-cols-2 gap-8">
@@ -767,6 +813,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <p className="text-sm">{formData.supplierInfo?.contact || "Contact: Jane Smith, Sales"}</p>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Order Details */}
           <div className="grid grid-cols-3 gap-8 text-sm border-y border-black py-4">
@@ -783,6 +830,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <p>{formData.paymentTerms || "Net 30"}</p>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Line Items Table */}
           <table className="w-full border-collapse text-sm">
@@ -804,6 +852,11 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 <td className="text-right py-3 px-2">$8,750.00</td>
               </tr>
               <tr className="border-b border-black">
+                <td colSpan={5}>
+                  <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+                </td>
+              </tr>
+              <tr className="border-b border-black">
                 <td className="py-3 px-2">2</td>
                 <td className="py-3 px-2">Standing Desks - Professional Series</td>
                 <td className="text-center py-3 px-2">15</td>
@@ -811,11 +864,21 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 <td className="text-right py-3 px-2">$12,000.00</td>
               </tr>
               <tr className="border-b border-black">
+                <td colSpan={5}>
+                  <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+                </td>
+              </tr>
+              <tr className="border-b border-black">
                 <td className="py-3 px-2">3</td>
                 <td className="py-3 px-2">Monitor Arms - Dual Mount</td>
                 <td className="text-center py-3 px-2">30</td>
                 <td className="text-right py-3 px-2">$125.00</td>
                 <td className="text-right py-3 px-2">$3,750.00</td>
+              </tr>
+              <tr className="border-b border-black">
+                <td colSpan={5}>
+                  <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -829,9 +892,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </div>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Special Instructions */}
-          <div className="text-sm border-t border-black pt-4">
+          <div className="text-sm pt-4">
             <p className="font-bold mb-2">SPECIAL INSTRUCTIONS:</p>
             <p className="text-black">
               {formData.specialInstructions ||
@@ -840,9 +904,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Authorization */}
-          <div className="border-t-2 border-black pt-6 mt-6">
+          <div className="pt-6 mt-6">
             <div className="grid grid-cols-2 gap-12">
               <div>
                 <div className="border-b border-black mb-2 h-10"></div>
@@ -877,6 +942,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <div className="border-2 border-black px-4 py-2 font-bold text-sm">PRIORITY: {priority}</div>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Work Order Details */}
           <div className="grid grid-cols-2 gap-6 text-sm border-b border-black pb-6">
@@ -889,6 +955,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <p>{completionDate}</p>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Client Information */}
           <div className="border border-black p-4">
@@ -897,6 +964,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="text-sm">{formData.clientInfo?.address || "123 Client Street, City, ST 12345"}</p>
             <p className="text-sm">{formData.clientInfo?.phone || "Phone: (555) 123-4567"}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Work Description */}
           <div>
@@ -910,6 +978,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Assigned Personnel */}
           <div>
@@ -920,6 +989,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <li>{formData.assignedPersonnel?.[2] || "Assistant - Mike Wilson"}</li>
             </ul>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Materials Required */}
           <div>
@@ -930,9 +1000,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               <li>{formData.materialsRequired?.[2] || "Safety equipment and PPE"}</li>
             </ul>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Notes Section */}
-          <div className="border-t border-black pt-4">
+          <div className="pt-4">
             <p className="font-bold text-sm uppercase tracking-wider mb-2">Special Notes:</p>
             <div className="border border-black p-3 text-sm">
               {getToneContent(
@@ -940,27 +1011,30 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               )}
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Signatures */}
-          <div className="grid grid-cols-2 gap-12 pt-6 mt-6 border-t-2 border-black">
-            <div className="space-y-6">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Supervisor Signature</p>
+          <div className="pt-6 mt-6">
+            <div className="grid grid-cols-2 gap-12">
+              <div className="space-y-6">
+                <div>
+                  <div className="border-b border-black mb-2 h-10"></div>
+                  <p className="text-xs font-bold">Supervisor Signature</p>
+                </div>
+                <div>
+                  <div className="border-b border-black mb-2"></div>
+                  <p className="text-xs">Date</p>
+                </div>
               </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
-              </div>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Client Signature</p>
-              </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
+              <div className="space-y-6">
+                <div>
+                  <div className="border-b border-black mb-2 h-10"></div>
+                  <p className="text-xs font-bold">Client Signature</p>
+                </div>
+                <div>
+                  <div className="border-b border-black mb-2"></div>
+                  <p className="text-xs">Date</p>
+                </div>
               </div>
             </div>
           </div>
@@ -980,6 +1054,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="text-sm">Report Date: {date}</p>
             <p className="text-sm mt-6 text-gray-600">Prepared by: {formData.preparer || "Research Department"}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Executive Summary */}
           <div className="space-y-3">
@@ -991,6 +1066,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Introduction */}
           <div className="space-y-3">
@@ -1002,6 +1078,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Methodology */}
           <div className="space-y-3">
@@ -1013,6 +1090,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Key Findings */}
           <div className="space-y-3">
@@ -1044,6 +1122,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </div>
             </div>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Conclusions */}
           <div className="space-y-3">
@@ -1055,6 +1134,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 )}
             </p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Recommendations */}
           <div className="space-y-3">
@@ -1086,10 +1166,12 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="text-sm mt-1">For the Period: {reportingPeriod}</p>
             <p className="text-xs text-black mt-2">All amounts in USD</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Balance Sheet */}
           <div>
             <h2 className="text-lg font-bold uppercase border-b border-black pb-2 mb-4">Balance Sheet</h2>
+            <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
             <div className="space-y-4">
               {/* Assets */}
@@ -1180,6 +1262,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
           {/* Income Statement */}
           <div className="mt-8">
             <h2 className="text-lg font-bold uppercase border-b border-black pb-2 mb-4">Income Statement</h2>
+            <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
             <table className="w-full text-sm">
               <tbody>
@@ -1262,6 +1345,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
             <p className="text-sm uppercase mt-2">{documentType}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Document Body */}
           <div className="space-y-4 text-justify leading-relaxed">
@@ -1374,9 +1458,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </div>
             )}
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Signature Area */}
-          <div className="mt-12 pt-8 border-t border-black">
+          <div className="mt-12 pt-8 ">
             <div className="grid grid-cols-2 gap-8">
               <div>
                 <div className="border-b border-black mb-2 h-10"></div>
@@ -1399,6 +1484,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
             <p className="text-sm uppercase mt-2">{documentType}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Document Body */}
           <div className="space-y-4 text-justify leading-relaxed">
@@ -1511,9 +1597,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </div>
             )}
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Signature Area */}
-          <div className="mt-12 pt-8 border-t border-black">
+          <div className="mt-12 pt-8 ">
             <div className="grid grid-cols-2 gap-8">
               <div>
                 <div className="border-b border-black mb-2 h-10"></div>
@@ -1536,6 +1623,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
             <p className="text-sm uppercase mt-2">{documentType}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Document Body */}
           <div className="space-y-4 text-justify leading-relaxed">
@@ -1648,9 +1736,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </div>
             )}
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Signature Area */}
-          <div className="mt-12 pt-8 border-t border-black">
+          <div className="mt-12 pt-8 ">
             <div className="grid grid-cols-2 gap-8">
               <div>
                 <div className="border-b border-black mb-2 h-10"></div>
@@ -1673,6 +1762,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
             <p className="text-sm uppercase mt-2">{documentType}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Document Body */}
           <div className="space-y-4 text-justify leading-relaxed">
@@ -1785,9 +1875,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </div>
             )}
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Signature Area */}
-          <div className="mt-12 pt-8 border-t border-black">
+          <div className="mt-12 pt-8 ">
             <div className="grid grid-cols-2 gap-8">
               <div>
                 <div className="border-b border-black mb-2 h-10"></div>
@@ -1810,6 +1901,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
             <p className="text-sm uppercase mt-2">{documentType}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Document Body */}
           <div className="space-y-4 text-justify leading-relaxed">
@@ -1922,9 +2014,288 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </div>
             )}
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Signature Area */}
-          <div className="mt-12 pt-8 border-t border-black">
+          <div className="mt-12 pt-8 ">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType}</p>
+          </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 ">
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <div className="border-b border-black mb-2 h-10"></div>
+                <p className="text-xs font-bold">Authorized Signature</p>
+              </div>
+              <div>
+                <div className="border-b border-black mb-2"></div>
+                <p className="text-xs">Date</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    } else if (documentType === "Other") {
+      // Generic document for other types including custom "Other" types
+      return (
+        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
+          {/* Header */}
+          <div className="text-center border-b-2 border-black pb-4 mb-8">
+            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
+            <p className="text-sm uppercase mt-2">{documentType}</p>
+          </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
+
+          {/* Document Body */}
+          <div className="space-y-4 text-justify leading-relaxed">
+            {Object.entries(formData)
+              .filter(
+                ([key]) =>
+                  ![
+                    "documentType",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "author",
+                    "status",
+                    "title",
+                    "tone",
+                    "customDocumentType",
+                    "invoiceNumber",
+                    "clientName",
+                    "totalAmount",
+                    "dueDate",
+                    "invoiceDate",
+                    "clientInfo",
+                    "partyA",
+                    "partyB",
+                    "duration",
+                    "paymentTerms",
+                    "contractTitle",
+                    "recitals",
+                    "terminationClause",
+                    "governingLaw",
+                    "senderAddress",
+                    "recipientAddress",
+                    "recipientName",
+                    "recipientTitle",
+                    "recipientCompany",
+                    "salutation",
+                    "body",
+                    "closing",
+                    "senderName",
+                    "senderTitle",
+                    "to",
+                    "from",
+                    "date",
+                    "subject",
+                    "purpose",
+                    "mainContent",
+                    "closingRemarks",
+                    "cc",
+                    "reportTitle",
+                    "executiveSummary",
+                    "introduction",
+                    "methodology",
+                    "conclusions",
+                    "companyInfo",
+                    "incomeStatement",
+                    "notes",
+                    "preparer",
+                    "workOrderNumber",
+                    "workOrderDate",
+                    "workDescription",
+                    "estimatedCompletionDate",
+                    "priority",
+                    "proposalTitle",
+                    "coverLetter",
+                    "background",
+                    "proposedSolution",
+                    "totalCost",
+                    "termsAndConditions",
+                    "conclusion",
+                    "receiptNumber",
+                    "receiptDate",
+                    "itemDescription",
+                    "quantity",
+                    "subtotal",
+                    "taxAmount",
+                    "paymentMethod",
+                    "customerInfo",
+                    "category",
+                    "summary",
+                    "content",
+                    "additionalNotes",
+                  ].includes(key),
+              )
+              .map(([key, value]) => (
+                <div key={key} className="mb-4">
+                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </p>
+                  <p className="text-sm pl-4">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value, null, 2)
+                      : String(value) || "[To be completed]"}
+                  </p>
+                </div>
+              ))}
+
+            {/* Add placeholder content if little user data */}
+            {Object.keys(formData).length < 5 && (
+              <div className="space-y-4 mt-8">
+                <p className="text-sm">
+                  {getToneContent(
+                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
+                  )}
+                </p>
+                <p className="text-sm">
+                  {getToneContent(
+                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
+
+          {/* Signature Area */}
+          <div className="mt-12 pt-8 ">
             <div className="grid grid-cols-2 gap-8">
               <div>
                 <div className="border-b border-black mb-2 h-10"></div>
@@ -1947,6 +2318,7 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
             <p className="text-sm uppercase mt-2">{documentType}</p>
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Document Body */}
           <div className="space-y-4 text-justify leading-relaxed">
@@ -2059,9 +2431,10 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
               </div>
             )}
           </div>
+          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Signature Area */}
-          <div className="mt-12 pt-8 border-t border-black">
+          <div className="mt-12 pt-8 ">
             <div className="grid grid-cols-2 gap-8">
               <div>
                 <div className="border-b border-black mb-2 h-10"></div>
