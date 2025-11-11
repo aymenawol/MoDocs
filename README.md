@@ -39,8 +39,6 @@ MoDocs streamlines small to medium business operations by reducing manual paperw
 - **JSON Export** - Download document data for backup/integration
 - **Client-Side Generation** - Fast, reliable PDF creation in-browser
 
-## 🖼️ Screenshots
-
 ### Document Manager
 View, search, and manage all your business documents in one place.
 
