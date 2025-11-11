@@ -255,14 +255,14 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
       const duration = formData.duration || "twelve (12) months"
       const paymentTerms = formData.paymentTerms || "as mutually agreed upon"
       const contractNumber = formData.contractNumber || "C2025-001"
-      const contractType = formData.contractType || "Contract Agreement"
+      const contractType = formData.contractTitle || "Contract Agreement" // Use contractTitle for the type here
 
       return (
         <div className="font-serif bg-white text-black p-8 max-w-4xl mx-auto space-y-6">
           {/* Header */}
           <div className="text-center pb-4">
             <h1 className="text-3xl font-bold uppercase tracking-wide mb-2">
-              {contractType === "Service Agreement" ? "Service Agreement" : "Contract Agreement"}
+              {contractType === "Service Agreement" ? "Service Agreement" : contractType}
             </h1>
             <p className="text-sm">Contract No. {contractNumber}</p>
           </div>
@@ -283,7 +283,8 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
             <p className="font-bold text-sm uppercase tracking-wider">WHEREAS:</p>
             <p className="text-sm pl-8 text-justify">
               {getToneContent(
-                "The parties wish to establish the terms and conditions of their business relationship as set forth in this Agreement, and to define their respective rights, obligations, and responsibilities for the mutual benefit of both parties.",
+                formData.recitals ||
+                  "The parties wish to establish the terms and conditions of their business relationship as set forth in this Agreement, and to define their respective rights, obligations, and responsibilities for the mutual benefit of both parties.",
               )}
             </p>
           </div>
@@ -306,7 +307,8 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 <p className="font-bold text-sm">2. SCOPE OF SERVICES</p>
                 <p className="text-sm pl-6 text-justify">
                   {getToneContent(
-                    "The First Party agrees to provide professional services as outlined in Exhibit A, attached hereto and incorporated by reference. Services shall be performed in a timely and professional manner, meeting industry standards and best practices.",
+                    formData.scopeOfServices ||
+                      "The First Party agrees to provide professional services as outlined in Exhibit A, attached hereto and incorporated by reference. Services shall be performed in a timely and professional manner, meeting industry standards and best practices.",
                   )}
                 </p>
               </div>
@@ -324,7 +326,8 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 <p className="font-bold text-sm">4. CONFIDENTIALITY</p>
                 <p className="text-sm pl-6 text-justify">
                   {getToneContent(
-                    "Both parties agree to maintain the confidentiality of any proprietary information shared during the term of this Agreement and for a period of two (2) years following termination.",
+                    formData.confidentialityClause ||
+                      "Both parties agree to maintain the confidentiality of any proprietary information shared during the term of this Agreement and for a period of two (2) years following termination.",
                   )}
                 </p>
               </div>
@@ -333,7 +336,8 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 <p className="font-bold text-sm">5. INTELLECTUAL PROPERTY</p>
                 <p className="text-sm pl-6 text-justify">
                   {getToneContent(
-                    "All intellectual property created during the performance of services under this Agreement shall be owned by the party specified in the Statement of Work, or jointly owned as mutually agreed upon.",
+                    formData.intellectualPropertyClause ||
+                      "All intellectual property created during the performance of services under this Agreement shall be owned by the party specified in the Statement of Work, or jointly owned as mutually agreed upon.",
                   )}
                 </p>
               </div>
@@ -342,7 +346,8 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
                 <p className="font-bold text-sm">6. TERMINATION</p>
                 <p className="text-sm pl-6 text-justify">
                   {getToneContent(
-                    "Either party may terminate this Agreement upon thirty (30) days written notice to the other party. Termination shall not affect any obligations or liabilities accrued prior to the effective date of termination.",
+                    formData.terminationClause ||
+                      "Either party may terminate this Agreement upon thirty (30) days written notice to the other party. Termination shall not affect any obligations or liabilities accrued prior to the effective date of termination.",
                   )}
                 </p>
               </div>
@@ -1337,1115 +1342,102 @@ function DocumentPreview({ formData, documentType, documentTitle, tone }: any) {
         </div>
       )
     } else if (documentType === "Other") {
-      // Generic document for other types including custom "Other" types
+      // CHANGE - Fixed Other document preview - removed duplicates and syntax error
       return (
         <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
           {/* Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-8">
-            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
-            <p className="text-sm uppercase mt-2">{documentType}</p>
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Document Body */}
-          <div className="space-y-4 text-justify leading-relaxed">
-            {Object.entries(formData)
-              .filter(
-                ([key]) =>
-                  ![
-                    "documentType",
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "author",
-                    "status",
-                    "title",
-                    "tone",
-                    "customDocumentType",
-                    "invoiceNumber",
-                    "clientName",
-                    "totalAmount",
-                    "dueDate",
-                    "invoiceDate",
-                    "clientInfo",
-                    "partyA",
-                    "partyB",
-                    "duration",
-                    "paymentTerms",
-                    "contractTitle",
-                    "recitals",
-                    "terminationClause",
-                    "governingLaw",
-                    "senderAddress",
-                    "recipientAddress",
-                    "recipientName",
-                    "recipientTitle",
-                    "recipientCompany",
-                    "salutation",
-                    "body",
-                    "closing",
-                    "senderName",
-                    "senderTitle",
-                    "to",
-                    "from",
-                    "date",
-                    "subject",
-                    "purpose",
-                    "mainContent",
-                    "closingRemarks",
-                    "cc",
-                    "reportTitle",
-                    "executiveSummary",
-                    "introduction",
-                    "methodology",
-                    "conclusions",
-                    "companyInfo",
-                    "incomeStatement",
-                    "notes",
-                    "preparer",
-                    "workOrderNumber",
-                    "workOrderDate",
-                    "workDescription",
-                    "estimatedCompletionDate",
-                    "priority",
-                    "proposalTitle",
-                    "coverLetter",
-                    "background",
-                    "proposedSolution",
-                    "totalCost",
-                    "termsAndConditions",
-                    "conclusion",
-                    "receiptNumber",
-                    "receiptDate",
-                    "itemDescription",
-                    "quantity",
-                    "subtotal",
-                    "taxAmount",
-                    "paymentMethod",
-                    "customerInfo",
-                    "category",
-                    "summary",
-                    "content",
-                    "additionalNotes",
-                  ].includes(key),
-              )
-              .map(([key, value]) => (
-                <div key={key} className="mb-4">
-                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}:
-                  </p>
-                  <p className="text-sm pl-4">
-                    {typeof value === "object" && value !== null
-                      ? JSON.stringify(value, null, 2)
-                      : String(value) || "[To be completed]"}
-                  </p>
-                </div>
-              ))}
-
-            {/* Add placeholder content if little user data */}
-            {Object.keys(formData).length < 5 && (
-              <div className="space-y-4 mt-8">
-                <p className="text-sm">
-                  {getToneContent(
-                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
-                  )}
-                </p>
-                <p className="text-sm">
-                  {getToneContent(
-                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
-                  )}
-                </p>
-              </div>
+          <div className="text-center pb-4">
+            <h1 className="text-3xl font-bold mb-2">{documentTitle || "Document"}</h1>
+            {formData.customDocumentType && (
+              <p className="text-sm uppercase tracking-wider">{formData.customDocumentType}</p>
             )}
           </div>
+
           <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
-          {/* Signature Area */}
-          <div className="mt-12 pt-8 ">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Authorized Signature</p>
-              </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
-              </div>
+          {/* Category/Purpose */}
+          {formData.category && (
+            <div className="my-6">
+              <p className="text-xs uppercase tracking-wide font-bold mb-2">Category</p>
+              <p className="text-sm">{formData.category}</p>
+            </div>
+          )}
+
+          {/* Summary/Brief Purpose */}
+          {formData.summary && (
+            <div className="my-6">
+              <p className="text-xs uppercase tracking-wide font-bold mb-2">Purpose</p>
+              <p className="text-sm leading-relaxed">{formData.summary}</p>
+            </div>
+          )}
+
+          <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+
+          {/* Main Content */}
+          <div className="my-8">
+            <p className="text-xs uppercase tracking-wide font-bold mb-4">Content</p>
+            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+              {formData.content ||
+                getToneContent(
+                  "This section contains the main content of your document. All information provided here is comprehensive and organized according to your specifications.",
+                )}
             </div>
           </div>
-        </div>
-      )
-    } else if (documentType === "Other") {
-      // Generic document for other types including custom "Other" types
-      return (
-        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
-          {/* Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-8">
-            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
-            <p className="text-sm uppercase mt-2">{documentType}</p>
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
-          {/* Document Body */}
-          <div className="space-y-4 text-justify leading-relaxed">
-            {Object.entries(formData)
-              .filter(
-                ([key]) =>
-                  ![
-                    "documentType",
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "author",
-                    "status",
-                    "title",
-                    "tone",
-                    "customDocumentType",
-                    "invoiceNumber",
-                    "clientName",
-                    "totalAmount",
-                    "dueDate",
-                    "invoiceDate",
-                    "clientInfo",
-                    "partyA",
-                    "partyB",
-                    "duration",
-                    "paymentTerms",
-                    "contractTitle",
-                    "recitals",
-                    "terminationClause",
-                    "governingLaw",
-                    "senderAddress",
-                    "recipientAddress",
-                    "recipientName",
-                    "recipientTitle",
-                    "recipientCompany",
-                    "salutation",
-                    "body",
-                    "closing",
-                    "senderName",
-                    "senderTitle",
-                    "to",
-                    "from",
-                    "date",
-                    "subject",
-                    "purpose",
-                    "mainContent",
-                    "closingRemarks",
-                    "cc",
-                    "reportTitle",
-                    "executiveSummary",
-                    "introduction",
-                    "methodology",
-                    "conclusions",
-                    "companyInfo",
-                    "incomeStatement",
-                    "notes",
-                    "preparer",
-                    "workOrderNumber",
-                    "workOrderDate",
-                    "workDescription",
-                    "estimatedCompletionDate",
-                    "priority",
-                    "proposalTitle",
-                    "coverLetter",
-                    "background",
-                    "proposedSolution",
-                    "totalCost",
-                    "termsAndConditions",
-                    "conclusion",
-                    "receiptNumber",
-                    "receiptDate",
-                    "itemDescription",
-                    "quantity",
-                    "subtotal",
-                    "taxAmount",
-                    "paymentMethod",
-                    "customerInfo",
-                    "category",
-                    "summary",
-                    "content",
-                    "additionalNotes",
-                  ].includes(key),
-              )
-              .map(([key, value]) => (
-                <div key={key} className="mb-4">
-                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}:
-                  </p>
-                  <p className="text-sm pl-4">
-                    {typeof value === "object" && value !== null
-                      ? JSON.stringify(value, null, 2)
-                      : String(value) || "[To be completed]"}
-                  </p>
-                </div>
-              ))}
+          {/* Additional Notes */}
+          {formData.additionalNotes && (
+            <>
+              <div style={{ height: "1px", background: "black", width: "100%" }}></div>
+              <div className="my-6">
+                <p className="text-xs uppercase tracking-wide font-bold mb-2">Additional Notes</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{formData.additionalNotes}</p>
+              </div>
+            </>
+          )}
 
-            {/* Add placeholder content if little user data */}
-            {Object.keys(formData).length < 5 && (
-              <div className="space-y-4 mt-8">
-                <p className="text-sm">
-                  {getToneContent(
-                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
-                  )}
-                </p>
-                <p className="text-sm">
-                  {getToneContent(
-                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
-                  )}
-                </p>
-              </div>
-            )}
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Signature Area */}
-          <div className="mt-12 pt-8 ">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Authorized Signature</p>
-              </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
-              </div>
+          {/* Add tone-appropriate placeholder if content is minimal */}
+          {!formData.content && (
+            <div className="space-y-4 mt-6 text-sm leading-relaxed">
+              <p>
+                {getToneContent(
+                  "This document serves as a comprehensive record and reference for the specified purpose. All details have been carefully compiled to ensure accuracy and completeness.",
+                )}
+              </p>
+              <p>
+                {getToneContent(
+                  "Please review the information provided and reach out if you have any questions or require clarification on any aspect of this document.",
+                )}
+              </p>
             </div>
-          </div>
-        </div>
-      )
-    } else if (documentType === "Other") {
-      // Generic document for other types including custom "Other" types
-      return (
-        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
-          {/* Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-8">
-            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
-            <p className="text-sm uppercase mt-2">{documentType}</p>
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
+          )}
 
-          {/* Document Body */}
-          <div className="space-y-4 text-justify leading-relaxed">
-            {Object.entries(formData)
-              .filter(
-                ([key]) =>
-                  ![
-                    "documentType",
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "author",
-                    "status",
-                    "title",
-                    "tone",
-                    "customDocumentType",
-                    "invoiceNumber",
-                    "clientName",
-                    "totalAmount",
-                    "dueDate",
-                    "invoiceDate",
-                    "clientInfo",
-                    "partyA",
-                    "partyB",
-                    "duration",
-                    "paymentTerms",
-                    "contractTitle",
-                    "recitals",
-                    "terminationClause",
-                    "governingLaw",
-                    "senderAddress",
-                    "recipientAddress",
-                    "recipientName",
-                    "recipientTitle",
-                    "recipientCompany",
-                    "salutation",
-                    "body",
-                    "closing",
-                    "senderName",
-                    "senderTitle",
-                    "to",
-                    "from",
-                    "date",
-                    "subject",
-                    "purpose",
-                    "mainContent",
-                    "closingRemarks",
-                    "cc",
-                    "reportTitle",
-                    "executiveSummary",
-                    "introduction",
-                    "methodology",
-                    "conclusions",
-                    "companyInfo",
-                    "incomeStatement",
-                    "notes",
-                    "preparer",
-                    "workOrderNumber",
-                    "workOrderDate",
-                    "workDescription",
-                    "estimatedCompletionDate",
-                    "priority",
-                    "proposalTitle",
-                    "coverLetter",
-                    "background",
-                    "proposedSolution",
-                    "totalCost",
-                    "termsAndConditions",
-                    "conclusion",
-                    "receiptNumber",
-                    "receiptDate",
-                    "itemDescription",
-                    "quantity",
-                    "subtotal",
-                    "taxAmount",
-                    "paymentMethod",
-                    "customerInfo",
-                    "category",
-                    "summary",
-                    "content",
-                    "additionalNotes",
-                  ].includes(key),
-              )
-              .map(([key, value]) => (
-                <div key={key} className="mb-4">
-                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}:
-                  </p>
-                  <p className="text-sm pl-4">
-                    {typeof value === "object" && value !== null
-                      ? JSON.stringify(value, null, 2)
-                      : String(value) || "[To be completed]"}
-                  </p>
-                </div>
-              ))}
-
-            {/* Add placeholder content if little user data */}
-            {Object.keys(formData).length < 5 && (
-              <div className="space-y-4 mt-8">
-                <p className="text-sm">
-                  {getToneContent(
-                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
-                  )}
-                </p>
-                <p className="text-sm">
-                  {getToneContent(
-                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
-                  )}
-                </p>
-              </div>
-            )}
-          </div>
           <div style={{ height: "2px", background: "black", width: "100%" }}></div>
 
           {/* Signature Area */}
-          <div className="mt-12 pt-8 ">
+          <div className="mt-12 pt-8">
             <div className="grid grid-cols-2 gap-8">
               <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Authorized Signature</p>
+                <div style={{ height: "1px", background: "black", width: "100%", marginBottom: "8px" }}></div>
+                <p className="text-xs font-bold uppercase tracking-wide">Authorized Signature</p>
               </div>
               <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    } else if (documentType === "Other") {
-      // Generic document for other types including custom "Other" types
-      return (
-        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
-          {/* Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-8">
-            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
-            <p className="text-sm uppercase mt-2">{documentType}</p>
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Document Body */}
-          <div className="space-y-4 text-justify leading-relaxed">
-            {Object.entries(formData)
-              .filter(
-                ([key]) =>
-                  ![
-                    "documentType",
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "author",
-                    "status",
-                    "title",
-                    "tone",
-                    "customDocumentType",
-                    "invoiceNumber",
-                    "clientName",
-                    "totalAmount",
-                    "dueDate",
-                    "invoiceDate",
-                    "clientInfo",
-                    "partyA",
-                    "partyB",
-                    "duration",
-                    "paymentTerms",
-                    "contractTitle",
-                    "recitals",
-                    "terminationClause",
-                    "governingLaw",
-                    "senderAddress",
-                    "recipientAddress",
-                    "recipientName",
-                    "recipientTitle",
-                    "recipientCompany",
-                    "salutation",
-                    "body",
-                    "closing",
-                    "senderName",
-                    "senderTitle",
-                    "to",
-                    "from",
-                    "date",
-                    "subject",
-                    "purpose",
-                    "mainContent",
-                    "closingRemarks",
-                    "cc",
-                    "reportTitle",
-                    "executiveSummary",
-                    "introduction",
-                    "methodology",
-                    "conclusions",
-                    "companyInfo",
-                    "incomeStatement",
-                    "notes",
-                    "preparer",
-                    "workOrderNumber",
-                    "workOrderDate",
-                    "workDescription",
-                    "estimatedCompletionDate",
-                    "priority",
-                    "proposalTitle",
-                    "coverLetter",
-                    "background",
-                    "proposedSolution",
-                    "totalCost",
-                    "termsAndConditions",
-                    "conclusion",
-                    "receiptNumber",
-                    "receiptDate",
-                    "itemDescription",
-                    "quantity",
-                    "subtotal",
-                    "taxAmount",
-                    "paymentMethod",
-                    "customerInfo",
-                    "category",
-                    "summary",
-                    "content",
-                    "additionalNotes",
-                  ].includes(key),
-              )
-              .map(([key, value]) => (
-                <div key={key} className="mb-4">
-                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}:
-                  </p>
-                  <p className="text-sm pl-4">
-                    {typeof value === "object" && value !== null
-                      ? JSON.stringify(value, null, 2)
-                      : String(value) || "[To be completed]"}
-                  </p>
-                </div>
-              ))}
-
-            {/* Add placeholder content if little user data */}
-            {Object.keys(formData).length < 5 && (
-              <div className="space-y-4 mt-8">
-                <p className="text-sm">
-                  {getToneContent(
-                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
-                  )}
-                </p>
-                <p className="text-sm">
-                  {getToneContent(
-                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
-                  )}
-                </p>
-              </div>
-            )}
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Signature Area */}
-          <div className="mt-12 pt-8 ">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Authorized Signature</p>
-              </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    } else if (documentType === "Other") {
-      // Generic document for other types including custom "Other" types
-      return (
-        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
-          {/* Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-8">
-            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
-            <p className="text-sm uppercase mt-2">{documentType}</p>
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Document Body */}
-          <div className="space-y-4 text-justify leading-relaxed">
-            {Object.entries(formData)
-              .filter(
-                ([key]) =>
-                  ![
-                    "documentType",
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "author",
-                    "status",
-                    "title",
-                    "tone",
-                    "customDocumentType",
-                    "invoiceNumber",
-                    "clientName",
-                    "totalAmount",
-                    "dueDate",
-                    "invoiceDate",
-                    "clientInfo",
-                    "partyA",
-                    "partyB",
-                    "duration",
-                    "paymentTerms",
-                    "contractTitle",
-                    "recitals",
-                    "terminationClause",
-                    "governingLaw",
-                    "senderAddress",
-                    "recipientAddress",
-                    "recipientName",
-                    "recipientTitle",
-                    "recipientCompany",
-                    "salutation",
-                    "body",
-                    "closing",
-                    "senderName",
-                    "senderTitle",
-                    "to",
-                    "from",
-                    "date",
-                    "subject",
-                    "purpose",
-                    "mainContent",
-                    "closingRemarks",
-                    "cc",
-                    "reportTitle",
-                    "executiveSummary",
-                    "introduction",
-                    "methodology",
-                    "conclusions",
-                    "companyInfo",
-                    "incomeStatement",
-                    "notes",
-                    "preparer",
-                    "workOrderNumber",
-                    "workOrderDate",
-                    "workDescription",
-                    "estimatedCompletionDate",
-                    "priority",
-                    "proposalTitle",
-                    "coverLetter",
-                    "background",
-                    "proposedSolution",
-                    "totalCost",
-                    "termsAndConditions",
-                    "conclusion",
-                    "receiptNumber",
-                    "receiptDate",
-                    "itemDescription",
-                    "quantity",
-                    "subtotal",
-                    "taxAmount",
-                    "paymentMethod",
-                    "customerInfo",
-                    "category",
-                    "summary",
-                    "content",
-                    "additionalNotes",
-                  ].includes(key),
-              )
-              .map(([key, value]) => (
-                <div key={key} className="mb-4">
-                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}:
-                  </p>
-                  <p className="text-sm pl-4">
-                    {typeof value === "object" && value !== null
-                      ? JSON.stringify(value, null, 2)
-                      : String(value) || "[To be completed]"}
-                  </p>
-                </div>
-              ))}
-
-            {/* Add placeholder content if little user data */}
-            {Object.keys(formData).length < 5 && (
-              <div className="space-y-4 mt-8">
-                <p className="text-sm">
-                  {getToneContent(
-                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
-                  )}
-                </p>
-                <p className="text-sm">
-                  {getToneContent(
-                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
-                  )}
-                </p>
-              </div>
-            )}
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Signature Area */}
-          <div className="mt-12 pt-8 ">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Authorized Signature</p>
-              </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    } else if (documentType === "Other") {
-      // Generic document for other types including custom "Other" types
-      return (
-        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
-          {/* Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-8">
-            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
-            <p className="text-sm uppercase mt-2">{documentType}</p>
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Document Body */}
-          <div className="space-y-4 text-justify leading-relaxed">
-            {Object.entries(formData)
-              .filter(
-                ([key]) =>
-                  ![
-                    "documentType",
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "author",
-                    "status",
-                    "title",
-                    "tone",
-                    "customDocumentType",
-                    "invoiceNumber",
-                    "clientName",
-                    "totalAmount",
-                    "dueDate",
-                    "invoiceDate",
-                    "clientInfo",
-                    "partyA",
-                    "partyB",
-                    "duration",
-                    "paymentTerms",
-                    "contractTitle",
-                    "recitals",
-                    "terminationClause",
-                    "governingLaw",
-                    "senderAddress",
-                    "recipientAddress",
-                    "recipientName",
-                    "recipientTitle",
-                    "recipientCompany",
-                    "salutation",
-                    "body",
-                    "closing",
-                    "senderName",
-                    "senderTitle",
-                    "to",
-                    "from",
-                    "date",
-                    "subject",
-                    "purpose",
-                    "mainContent",
-                    "closingRemarks",
-                    "cc",
-                    "reportTitle",
-                    "executiveSummary",
-                    "introduction",
-                    "methodology",
-                    "conclusions",
-                    "companyInfo",
-                    "incomeStatement",
-                    "notes",
-                    "preparer",
-                    "workOrderNumber",
-                    "workOrderDate",
-                    "workDescription",
-                    "estimatedCompletionDate",
-                    "priority",
-                    "proposalTitle",
-                    "coverLetter",
-                    "background",
-                    "proposedSolution",
-                    "totalCost",
-                    "termsAndConditions",
-                    "conclusion",
-                    "receiptNumber",
-                    "receiptDate",
-                    "itemDescription",
-                    "quantity",
-                    "subtotal",
-                    "taxAmount",
-                    "paymentMethod",
-                    "customerInfo",
-                    "category",
-                    "summary",
-                    "content",
-                    "additionalNotes",
-                  ].includes(key),
-              )
-              .map(([key, value]) => (
-                <div key={key} className="mb-4">
-                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}:
-                  </p>
-                  <p className="text-sm pl-4">
-                    {typeof value === "object" && value !== null
-                      ? JSON.stringify(value, null, 2)
-                      : String(value) || "[To be completed]"}
-                  </p>
-                </div>
-              ))}
-
-            {/* Add placeholder content if little user data */}
-            {Object.keys(formData).length < 5 && (
-              <div className="space-y-4 mt-8">
-                <p className="text-sm">
-                  {getToneContent(
-                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
-                  )}
-                </p>
-                <p className="text-sm">
-                  {getToneContent(
-                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
-                  )}
-                </p>
-              </div>
-            )}
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Signature Area */}
-          <div className="mt-12 pt-8 ">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Authorized Signature</p>
-              </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    } else if (documentType === "Other") {
-      // Generic document for other types including custom "Other" types
-      return (
-        <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
-          {/* Header */}
-          <div className="text-center border-b-2 border-black pb-4 mb-8">
-            <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
-            <p className="text-sm uppercase mt-2">{documentType}</p>
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Document Body */}
-          <div className="space-y-4 text-justify leading-relaxed">
-            {Object.entries(formData)
-              .filter(
-                ([key]) =>
-                  ![
-                    "documentType",
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "author",
-                    "status",
-                    "title",
-                    "tone",
-                    "customDocumentType",
-                    "invoiceNumber",
-                    "clientName",
-                    "totalAmount",
-                    "dueDate",
-                    "invoiceDate",
-                    "clientInfo",
-                    "partyA",
-                    "partyB",
-                    "duration",
-                    "paymentTerms",
-                    "contractTitle",
-                    "recitals",
-                    "terminationClause",
-                    "governingLaw",
-                    "senderAddress",
-                    "recipientAddress",
-                    "recipientName",
-                    "recipientTitle",
-                    "recipientCompany",
-                    "salutation",
-                    "body",
-                    "closing",
-                    "senderName",
-                    "senderTitle",
-                    "to",
-                    "from",
-                    "date",
-                    "subject",
-                    "purpose",
-                    "mainContent",
-                    "closingRemarks",
-                    "cc",
-                    "reportTitle",
-                    "executiveSummary",
-                    "introduction",
-                    "methodology",
-                    "conclusions",
-                    "companyInfo",
-                    "incomeStatement",
-                    "notes",
-                    "preparer",
-                    "workOrderNumber",
-                    "workOrderDate",
-                    "workDescription",
-                    "estimatedCompletionDate",
-                    "priority",
-                    "proposalTitle",
-                    "coverLetter",
-                    "background",
-                    "proposedSolution",
-                    "totalCost",
-                    "termsAndConditions",
-                    "conclusion",
-                    "receiptNumber",
-                    "receiptDate",
-                    "itemDescription",
-                    "quantity",
-                    "subtotal",
-                    "taxAmount",
-                    "paymentMethod",
-                    "customerInfo",
-                    "category",
-                    "summary",
-                    "content",
-                    "additionalNotes",
-                  ].includes(key),
-              )
-              .map(([key, value]) => (
-                <div key={key} className="mb-4">
-                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}:
-                  </p>
-                  <p className="text-sm pl-4">
-                    {typeof value === "object" && value !== null
-                      ? JSON.stringify(value, null, 2)
-                      : String(value) || "[To be completed]"}
-                  </p>
-                </div>
-              ))}
-
-            {/* Add placeholder content if little user data */}
-            {Object.keys(formData).length < 5 && (
-              <div className="space-y-4 mt-8">
-                <p className="text-sm">
-                  {getToneContent(
-                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
-                  )}
-                </p>
-                <p className="text-sm">
-                  {getToneContent(
-                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
-                  )}
-                </p>
-              </div>
-            )}
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Signature Area */}
-          <div className="mt-12 pt-8 ">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Authorized Signature</p>
-              </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
+                <div style={{ height: "1px", background: "black", width: "100%", marginBottom: "8px" }}></div>
+                <p className="text-xs uppercase tracking-wide">Date</p>
               </div>
             </div>
           </div>
         </div>
       )
     } else {
-      // Generic document for other types including custom "Other" types
+      // Generic fallback for any unknown document type
       return (
         <div className="space-y-6 bg-white p-12 text-black font-serif max-w-[8.5in] mx-auto">
-          {/* Header */}
           <div className="text-center border-b-2 border-black pb-4 mb-8">
             <h1 className="text-2xl font-bold uppercase tracking-widest">{documentTitle || "Document"}</h1>
             <p className="text-sm uppercase mt-2">{documentType}</p>
           </div>
           <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Document Body */}
-          <div className="space-y-4 text-justify leading-relaxed">
-            {Object.entries(formData)
-              .filter(
-                ([key]) =>
-                  ![
-                    "documentType",
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "author",
-                    "status",
-                    "title",
-                    "tone",
-                    "customDocumentType",
-                    "invoiceNumber",
-                    "clientName",
-                    "totalAmount",
-                    "dueDate",
-                    "invoiceDate",
-                    "clientInfo",
-                    "partyA",
-                    "partyB",
-                    "duration",
-                    "paymentTerms",
-                    "contractTitle",
-                    "recitals",
-                    "terminationClause",
-                    "governingLaw",
-                    "senderAddress",
-                    "recipientAddress",
-                    "recipientName",
-                    "recipientTitle",
-                    "recipientCompany",
-                    "salutation",
-                    "body",
-                    "closing",
-                    "senderName",
-                    "senderTitle",
-                    "to",
-                    "from",
-                    "date",
-                    "subject",
-                    "purpose",
-                    "mainContent",
-                    "closingRemarks",
-                    "cc",
-                    "reportTitle",
-                    "executiveSummary",
-                    "introduction",
-                    "methodology",
-                    "conclusions",
-                    "companyInfo",
-                    "incomeStatement",
-                    "notes",
-                    "preparer",
-                    "workOrderNumber",
-                    "workOrderDate",
-                    "workDescription",
-                    "estimatedCompletionDate",
-                    "priority",
-                    "proposalTitle",
-                    "coverLetter",
-                    "background",
-                    "proposedSolution",
-                    "totalCost",
-                    "termsAndConditions",
-                    "conclusion",
-                    "receiptNumber",
-                    "receiptDate",
-                    "itemDescription",
-                    "quantity",
-                    "subtotal",
-                    "taxAmount",
-                    "paymentMethod",
-                    "customerInfo",
-                    "category",
-                    "summary",
-                    "content",
-                    "additionalNotes",
-                  ].includes(key),
-              )
-              .map(([key, value]) => (
-                <div key={key} className="mb-4">
-                  <p className="font-bold text-sm uppercase tracking-wide mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}:
-                  </p>
-                  <p className="text-sm pl-4">
-                    {typeof value === "object" && value !== null
-                      ? JSON.stringify(value, null, 2)
-                      : String(value) || "[To be completed]"}
-                  </p>
-                </div>
-              ))}
-
-            {/* Add placeholder content if little user data */}
-            {Object.keys(formData).length < 5 && (
-              <div className="space-y-4 mt-8">
-                <p className="text-sm">
-                  {getToneContent(
-                    "This document has been prepared in accordance with the specified requirements and guidelines. All information contained herein is accurate and complete to the best of our knowledge.",
-                  )}
-                </p>
-                <p className="text-sm">
-                  {getToneContent(
-                    "Please review the contents carefully and contact us if you have any questions or require additional information. We are committed to ensuring your satisfaction and meeting your needs.",
-                  )}
-                </p>
-              </div>
-            )}
-          </div>
-          <div style={{ height: "2px", background: "black", width: "100%" }}></div>
-
-          {/* Signature Area */}
-          <div className="mt-12 pt-8 ">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="border-b border-black mb-2 h-10"></div>
-                <p className="text-xs font-bold">Authorized Signature</p>
-              </div>
-              <div>
-                <div className="border-b border-black mb-2"></div>
-                <p className="text-xs">Date</p>
-              </div>
-            </div>
-          </div>
+          <p className="text-center text-muted-foreground">Preview not available for this document type.</p>
         </div>
       )
     }
@@ -2605,7 +1597,7 @@ export default function CreateDocumentPage() {
       documentType: documentTypeRef.current === "Other" ? customDocumentType : documentTypeRef.current,
       ...(documentTypeRef.current === "Other" ? { customDocumentType } : {}),
       tone,
-      status: currentStep === 4 ? "Completed" : "In Progress", // Completed only if at preview stage
+      status: currentStep === 4 ? "completed" : "in_progress", // Completed only if at preview stage
       updatedAt: new Date().toISOString(),
       id: editingDocId || formDataRef.current.id || `doc-${Date.now()}`,
       createdAt: formDataRef.current.createdAt || new Date().toISOString(),
@@ -2664,7 +1656,7 @@ export default function CreateDocumentPage() {
       createdAt: formDataRef.current.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       author: "Current User",
-      status: "In Progress", // Set initial status
+      status: "in_progress", // Set initial status
       tone,
     }
     setFormData(updatedData)
@@ -2781,7 +1773,7 @@ export default function CreateDocumentPage() {
       documentType: finalDocumentType,
       customDocumentType: documentType === "Other" ? customDocumentType : undefined,
       title: documentTitle,
-      status: "Completed",
+      status: "completed",
       createdAt: formData.createdAt || timestamp,
       updatedAt: timestamp,
       tone,
@@ -2922,7 +1914,7 @@ export default function CreateDocumentPage() {
       documentType: finalDocumentType,
       title: documentTitle,
       tone,
-      status: "Completed",
+      status: "completed",
       updatedAt: new Date().toISOString(),
     }
 
@@ -2959,7 +1951,7 @@ export default function CreateDocumentPage() {
       documentType: finalDocumentType,
       title: documentTitle,
       tone,
-      status: "Completed",
+      status: "completed",
       updatedAt: new Date().toISOString(),
     }
 
@@ -2987,7 +1979,7 @@ export default function CreateDocumentPage() {
       documentType: finalDocumentType,
       title: documentTitle,
       tone,
-      status: "Completed",
+      status: "completed",
       updatedAt: new Date().toISOString(),
     }
 
