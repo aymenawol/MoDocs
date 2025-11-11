@@ -1935,7 +1935,7 @@ export default function CreateDocumentPage() {
       }
     }
 
-    localStorage.setItem("modocs_documents", JSON.JSON.stringify(docs))
+    localStorage.setItem("modocs_documents", JSON.stringify(docs))
     window.dispatchEvent(new Event("storage"))
     setHasUnsavedChanges(false)
     hasUnsavedChangesRef.current = false // Update ref
@@ -2171,7 +2171,7 @@ export default function CreateDocumentPage() {
             onChange={handleInputChange}
             onNestedChange={handleNestedInputChange}
             errors={errors}
-          />
+          /> 
         )
       case "Contract":
         return <ContractForm data={formData} onChange={handleInputChange} errors={errors} />
