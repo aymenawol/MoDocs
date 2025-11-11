@@ -1,10 +1,10 @@
 # MoDocs - AI-Driven Business Document Generator
 
-![MoDocs Document Manager](public/hero-image.png)
+![MoDocs Document Manager](public/preview-screen.png)
 
 ## 📄 What MoDocs Does
 
-MoDocs is an AI-driven platform that automates professional business document creation. It generates invoices, contracts, reports, proposals, and more using intelligent templates and user inputs. The system adapts tone and content automatically, provides a guided creation workflow, and lets users preview, edit, and manage documents in real time.
+MoDocs is an AI-driven platform that automates professional business document creation. It generates invoices, contracts, reports, proposals, and more using intelligent templates and user inputs.
 
 MoDocs streamlines small to medium business operations by reducing manual paperwork, saving time, and improving consistency across essential documents.
 
@@ -44,12 +44,12 @@ MoDocs streamlines small to medium business operations by reducing manual paperw
 ### Document Manager
 View, search, and manage all your business documents in one place.
 
-![Document Manager Grid View](public/hero-image.png)
+![Document Manager Grid View](public/document-manager.png)
 
 ### Document Creation Wizard
 Step-by-step guided process for creating professional documents.
 
-![Create Document Wizard](public/hero-image.png)
+![Create Document Wizard](public/create-document.png)
 
 ## 🛠️ Setup and Installation
 
