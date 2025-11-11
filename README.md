@@ -156,19 +156,7 @@ MoDocs/
 └── package.json                 # Dependencies and scripts
 ```
 
-## 🤝 Contributing
-
-This is a prototype project. Contributions, issues, and feature requests are welcome!
-
-## 📄 License
-
-This project is for educational/demonstration purposes.
-
 ## 👤 Author
 
 **Aymen Awol**
 - GitHub: [@aymenawol](https://github.com/aymenawol)
-
----
-
-Built with ❤️ for streamlining business document creation
