@@ -1,11 +1,11 @@
 <svg width="180" height="180" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">MoDocs Icon</title>
   <desc id="desc">Rounded square with a blue document glyph that matches the MoDocs navigation logo.</desc>
-  <rect x="2" y="2" width="60" height="60" rx="14" fill="#E6EEFF" />
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#2663EB" />
   <path
     d="M24 12C21.7909 12 20 13.7909 20 16V48C20 50.2091 21.7909 52 24 52H40C42.2091 52 44 50.2091 44 48V22L34 12H24Z"
     fill="#FFFFFF"
-    stroke="#2663EB"
+    stroke="#FFFFFF"
     stroke-width="2"
     stroke-linejoin="round"
   />
