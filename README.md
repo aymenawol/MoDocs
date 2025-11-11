@@ -1,30 +1,187 @@
-# Business Document Generator
+# MoDocs - AI-Driven Business Document Generator
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+![MoDocs Document Manager](public/hero-image.png)
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/aymenawol070106-6751s-projects/v0-mo-docs)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/o0KAXwWG6yC)
+## 📄 What MoDocs Does
 
-## Overview
+MoDocs is an AI-driven platform that automates professional business document creation. It generates invoices, contracts, reports, proposals, and more using intelligent templates and user inputs. The system adapts tone and content automatically, provides a guided creation workflow, and lets users preview, edit, and manage documents in real time.
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+MoDocs streamlines small to medium business operations by reducing manual paperwork, saving time, and improving consistency across essential documents.
 
-## Deployment
+## 🚀 Key Features
 
-Your project is live at:
+### 📝 Multi-Document Support
+- **Purchase Orders** - Generate detailed procurement documents
+- **Invoices** - Create professional billing statements
+- **Proposals** - Craft compelling business proposals
+- **Contracts** - Draft comprehensive agreements
+- **Reports** - Generate business analytics and summaries
+- **Financial Statements** - Create formal financial documents
+- **Receipts** - Issue transaction confirmations
+- **Custom Documents** - Build your own document types
 
-**[https://vercel.com/aymenawol070106-6751s-projects/v0-mo-docs](https://vercel.com/aymenawol070106-6751s-projects/v0-mo-docs)**
+### 🎨 Smart Document Creation
+- **Guided Workflow** - 4-step wizard (Type → Tone → Details → Preview)
+- **Tone Selection** - Professional, Friendly, or Formal writing styles
+- **AI-Powered Generation** - Automatic content generation based on inputs
+- **Real-Time Preview** - See your document before finalizing
+- **Template System** - Pre-built templates for common document types
 
-## Build your app
+### 💾 Document Management
+- **Persistent Storage** - All documents saved locally in browser
+- **Search & Filter** - Find documents by title, type, or author
+- **Grid & Table Views** - Multiple viewing options for your documents
+- **Status Tracking** - Track In Progress vs Completed documents
+- **Quick Actions** - View, Edit, and Delete documents with one click
 
-Continue building your app on:
+### 📤 Export Options
+- **PDF Download** - Export documents as professional PDFs
+- **JSON Export** - Download document data for backup/integration
+- **Client-Side Generation** - Fast, reliable PDF creation in-browser
 
-**[https://v0.app/chat/o0KAXwWG6yC](https://v0.app/chat/o0KAXwWG6yC)**
+## 🖼️ Screenshots
 
-## How It Works
+### Document Manager
+View, search, and manage all your business documents in one place.
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+![Document Manager Grid View](public/hero-image.png)
+
+### Document Creation Wizard
+Step-by-step guided process for creating professional documents.
+
+![Create Document Wizard](public/hero-image.png)
+
+## 🛠️ Setup and Installation
+
+### Prerequisites
+- Node.js 18+ or npm
+- Git
+
+### Installation Steps
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/aymenawol/MoDocs.git
+cd MoDocs
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Run the development server**
+```bash
+npm run dev
+```
+
+4. **Open in browser**
+Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+## 📋 Usage Guide
+
+### Creating Your First Document
+
+1. **Navigate to MoDocs** - Click "Create Document" from the home page
+2. **Select Document Type** - Choose from Purchase Order, Invoice, Proposal, etc.
+3. **Choose Tone** - Pick Professional, Friendly, or Formal
+4. **Fill in Details** - Complete the form fields specific to your document type
+5. **Generate Document** - Click "Generate" to create your document with AI
+6. **Preview & Edit** - Review the generated content and make adjustments
+7. **Download** - Export as PDF or JSON
+
+### Managing Documents
+
+- **View Documents** - Click "Manage Documents" to see all created documents
+- **Search** - Use the search bar to find documents by title or author
+- **Filter** - Filter by document type (All Types, Invoice, Contract, etc.)
+- **Grid/Table View** - Toggle between grid cards and table layout
+- **Edit** - Click "Edit" on any document to modify it
+- **Delete** - Remove documents you no longer need
+
+## 🏗️ Technology Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui + Radix UI
+- **Icons**: Lucide React
+- **PDF Generation**: jsPDF + html2canvas (client-side)
+- **Storage**: Browser localStorage (no backend required)
+- **Deployment**: Vercel-ready
+
+## ⚠️ Current Limitations & Assumptions
+
+### Assumptions
+- **Browser Storage**: Documents are stored in browser's localStorage (limit ~5-10MB)
+- **Single User**: Designed for individual use, no multi-user authentication
+- **Client-Side Only**: No server-side processing or database
+- **Simulated AI**: Current version uses placeholder generation (3-second delay) rather than real AI
+
+### Limitations
+- **Data Persistence**: Documents are lost if browser cache is cleared
+- **No Cloud Sync**: Cannot access documents from different devices
+- **No Collaboration**: Single-user editing, no real-time collaboration
+- **Storage Limits**: Browser storage quota limits total document capacity
+- **No AI Integration**: Placeholder content generation (not connected to OpenAI/Claude)
+- **No User Accounts**: No authentication or user management system
+
+## 🔮 Future Enhancements
+
+### Planned Improvements
+1. **Real AI Integration** - Connect to OpenAI or Claude APIs for intelligent content generation
+2. **Cloud Backend** - Implement Supabase or Firebase for persistent cloud storage
+3. **User Authentication** - Add login system for secure, multi-device access
+4. **Real-Time Collaboration** - Enable multiple users to edit documents simultaneously
+5. **Advanced Templates** - Expand document library with industry-specific templates
+6. **Version History** - Track document changes and allow rollback
+7. **Team Features** - Share documents, assign roles, and manage permissions
+8. **Analytics Dashboard** - Track document creation metrics and usage statistics
+
+## 📁 Project Structure
+
+```
+MoDocs/
+├── app/                          # Next.js App Router pages
+│   ├── modocs/
+│   │   ├── page.tsx             # Landing page
+│   │   ├── create/page.tsx      # Document creation wizard
+│   │   └── view/page.tsx        # Document manager
+│   ├── layout.tsx               # Root layout
+│   └── globals.css              # Global styles
+├── components/
+│   ├── ui/                      # shadcn/ui components
+│   ├── document-preview.tsx     # Document preview renderer
+│   └── theme-provider.tsx       # Dark mode support
+├── lib/
+│   ├── document-templates.ts    # Document content templates
+│   ├── document-types.ts        # Document type definitions
+│   ├── validation.ts            # Form validation logic
+│   └── utils.ts                 # Utility functions
+├── public/                      # Static assets
+└── package.json                 # Dependencies and scripts
+```
+
+## 🤝 Contributing
+
+This is a prototype project. Contributions, issues, and feature requests are welcome!
+
+## 📄 License
+
+This project is for educational/demonstration purposes.
+
+## 👤 Author
+
+**Aymen Awol**
+- GitHub: [@aymenawol](https://github.com/aymenawol)
+
+---
+
+Built with ❤️ for streamlining business document creation
